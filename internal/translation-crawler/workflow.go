@@ -1,0 +1,60 @@
+package translation_crawler
+
+import (
+	"fmt"
+	"time"
+	
+	"go.temporal.io/sdk/workflow"
+	"temporal-crawler/internal/activities"
+	book_crawler "temporal-crawler/internal/book-crawler"
+)
+
+type (
+	TranslationInfo struct {
+		Name  string
+		Books []book_crawler.BookInfo
+	}
+)
+
+func TranslationCrawlerWorkflow(ctx workflow.Context, tran string) (map[int]int, error) {
+	ctx = workflow.WithActivityOptions(ctx, workflow.ActivityOptions{
+		StartToCloseTimeout: 2 * time.Minute,
+	})
+	
+	// execute FetchActivity
+	var body []byte
+	err := workflow.ExecuteActivity(ctx, activities.FetchActivity, "https://kinhthanh.httlvn.org/?v="+tran).Get(ctx, &body)
+	if err != nil {
+		return nil, err
+	}
+	
+	// parse translation information
+	var transInfo *TranslationInfo
+	err = workflow.ExecuteActivity(ctx, ParseActivity, tran, body).Get(ctx, &transInfo)
+	if err != nil {
+		return nil, err
+	}
+	
+	// start crawling books
+	var results []workflow.ChildWorkflowFuture
+	for i, bookInfo := range transInfo.Books {
+		childCtx := workflow.WithChildOptions(ctx, workflow.ChildWorkflowOptions{
+			WorkflowID: fmt.Sprintf("%s/%d", workflow.GetInfo(ctx).WorkflowExecution.ID, i),
+		})
+		
+		child := workflow.ExecuteChildWorkflow(childCtx, book_crawler.BookCrawlerWorkflow, bookInfo)
+		results = append(results, child)
+	}
+	
+	// Waits for all child workflows to complete
+	out := map[int]int{}
+	for i, result := range results {
+		chapters := 0
+		if err := result.Get(ctx, &chapters); err != nil {
+			return nil, err
+		}
+		out[i] = chapters
+	}
+	
+	return out, nil
+}
