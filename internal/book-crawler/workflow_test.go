@@ -1,9 +1,7 @@
 package book_crawler
 
 import (
-	"context"
 	"encoding/json"
-	"fmt"
 	"os"
 	"testing"
 	"time"
@@ -37,15 +35,6 @@ func mockFetchResponse() []byte {
 	}
 	
 	return mockHTML
-}
-
-func TestParseActivity(t *testing.T) {
-	chap, err := ParseActivity(context.Background(), mockFetchResponse())
-	if nil != err {
-		panic(err)
-	}
-	
-	fmt.Println(chap)
 }
 
 func TestWorkflow(t *testing.T) {
