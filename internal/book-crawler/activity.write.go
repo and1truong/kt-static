@@ -32,14 +32,16 @@ func NewResultWriter(writer writer, dir string) *ResultWriter {
 	}
 	
 	return &ResultWriter{
-		baseDir: dir,
-		writer:  writer,
+		baseDir:          dir,
+		createMissingDir: true,
+		writer:           writer,
 	}
 }
 
 type ResultWriter struct {
-	baseDir string
-	writer  writer
+	baseDir          string
+	createMissingDir bool
+	writer           writer
 }
 
 func (w *ResultWriter) getWriter() writer {
@@ -95,10 +97,12 @@ func (w *ResultWriter) WriteResultActivity(ctx context.Context, book BookInfo, c
 func (w *ResultWriter) getWritingPath(format string, a ...any) (string, error) {
 	writePath := fmt.Sprintf(format, a...)
 	
-	if _, err := os.Stat(writePath); os.IsNotExist(err) {
-		err := os.MkdirAll(filepath.Dir(writePath), 0755)
-		if err != nil {
-			return "", err
+	if w.createMissingDir {
+		if _, err := os.Stat(writePath); os.IsNotExist(err) {
+			err := os.MkdirAll(filepath.Dir(writePath), 0755)
+			if err != nil {
+				return "", err
+			}
 		}
 	}
 	

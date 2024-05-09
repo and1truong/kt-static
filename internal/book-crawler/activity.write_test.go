@@ -22,8 +22,8 @@ func TestWriteResultActivity(t *testing.T) {
 	items := []writeTestData{
 		{
 			bookRaw:    fixtures.BookSampleJudeJson,
-			chapterRaw: fixtures.ChapterSampleViHtml,
-			resultPath: "../../build/VI1934/giu/1.html",
+			chapterRaw: fixtures.ChapterSampleViJson,
+			resultPath: "/build/static/VI1934/giu/1.md",
 			resultContains: []string{
 				"title: Giu-đe  1",
 				"book: Giu-đe",
@@ -53,8 +53,8 @@ func TestWriteResultActivity(t *testing.T) {
 	env.RegisterActivity(nopeWriter.WriteResultActivity)
 	
 	for _, item := range items {
-		json.Unmarshal(item.bookRaw, &book)
-		json.Unmarshal(item.chapterRaw, &chapter)
+		require.NoError(t, json.Unmarshal(item.bookRaw, &book))
+		require.NoError(t, json.Unmarshal(item.chapterRaw, &chapter))
 		
 		_, err := env.ExecuteActivity(nopeWriter.WriteResultActivity, book, chapter)
 		require.NoError(t, err)

@@ -10,6 +10,9 @@ var BookInfoJudeJson []byte
 //go:embed chapter.vi.html
 var ChapterSampleViHtml []byte
 
+//go:embed chapter.vi.json
+var ChapterSampleViJson []byte
+
 //go:embed chapter.en.html
 var ChapterSampleEnHtml []byte
 
