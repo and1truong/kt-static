@@ -4,5 +4,5 @@ temporal-dev:
 go-mod-tidy:
 	go mod tidy
 
-go-test:
+test:
 	go test -v ./...

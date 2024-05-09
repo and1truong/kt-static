@@ -27,8 +27,8 @@ func mockBookInfo() BookInfo {
 	return book
 }
 
-func mockFetchResponse() []byte {
-	mockHTML, err := os.ReadFile("resources/fixtures/chapter.html")
+func mockFetchResponse(path string) []byte {
+	mockHTML, err := os.ReadFile(path)
 	
 	if err != nil {
 		panic(err)
@@ -46,7 +46,7 @@ func TestWorkflow(t *testing.T) {
 	env.SetTestTimeout(10 * time.Minute)
 	env.
 		OnActivity(activities.FetchActivity, mock.Anything, "https://kinhthanh.httlvn.org/doc-kinh-thanh/giu/1?v=VI1934").
-		Return(mockFetchResponse(), nil)
+		Return(mockFetchResponse("resources/fixtures/chapter.vi.html"), nil)
 	env.RegisterActivity(ParseActivity)
 	
 	// run it
