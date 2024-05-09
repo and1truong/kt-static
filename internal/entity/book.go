@@ -1,9 +1,9 @@
-package book_crawler
+package entity
 
 import (
 	"fmt"
 	"strings"
-	
+
 	"temporal-crawler/internal/resources/translation"
 )
 
@@ -17,14 +17,14 @@ type (
 		Group      string
 		Testament  string
 	}
-	
+
 	ChapterInfo struct {
 		Lang       translation.LANG
 		Number     int
 		Blocks     []Block
 		AudioLinks []string
 	}
-	
+
 	Block struct {
 		Kind       string
 		Number     string
@@ -33,7 +33,7 @@ type (
 		References []string // …
 		NewLine    bool
 	}
-	
+
 	InnerBlock struct {
 		Content    string
 		References []string
@@ -42,22 +42,24 @@ type (
 
 func (chap ChapterInfo) String() string {
 	out := fmt.Sprintf("# %s %d\n\n", translation.Get("Chapter", chap.Lang), chap.Number)
-	
+
 	for _, block := range chap.Blocks {
 		out += block.String()
 	}
-	
+
 	return out
 }
 
 func (b Block) String() string {
 	out := ""
-	
+
+	if len(b.Content) == 0 {
+		return out
+	}
+
 	if b.Kind == "title" {
-		out += "\n"
-		out += "## "
-		out += b.Content[0].Content
-		out += "\n\n"
+		out += "\n## " + b.Content[0].Content + "\n"
+
 	} else {
 		num := b.Number
 		num = strings.ReplaceAll(num, "0", "⁰")
@@ -71,25 +73,25 @@ func (b Block) String() string {
 		num = strings.ReplaceAll(num, "8", "⁸")
 		num = strings.ReplaceAll(num, "9", "⁹")
 		out += " " + num + " "
-		
+
 		parts := make([]string, len(b.Content))
 		for i, part := range b.Content {
 			parts[i] += part.Content + " "
-			
+
 			if false && len(part.References) > 0 {
 				parts[i] += " ⚓ "
 				// parts[i] += "\n\n    ⚓ " + strings.Join(part.References, "; ") + "\n\n"
 			}
 		}
-		
+
 		out += strings.Join(parts, "\n")
-		
+
 		if b.NewLine {
 			out += "\n\n"
 		} else {
 			out += " "
 		}
 	}
-	
+
 	return out
 }

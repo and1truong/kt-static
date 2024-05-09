@@ -9,6 +9,7 @@ import (
 	
 	"github.com/stretchr/testify/require"
 	"go.temporal.io/sdk/testsuite"
+	"temporal-crawler/internal/entity"
 	"temporal-crawler/internal/resources/fixtures"
 )
 
@@ -21,7 +22,7 @@ func TestParseActivity(t *testing.T) {
 	val, err := env.ExecuteActivity(TranslationParseActivity, "VI1934", fixtures.TranslationSample_VI1934_Html)
 	require.NoError(t, err)
 	
-	var result *TranslationInfo
+	var result *entity.TranslationInfo
 	require.NoError(t, val.Get(&result))
 	require.Equal(t, "VI1934", result.Name)
 	require.Equal(t, 66, len(result.Books))

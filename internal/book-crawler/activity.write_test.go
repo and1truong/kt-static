@@ -8,6 +8,7 @@ import (
 	
 	"github.com/stretchr/testify/require"
 	"go.temporal.io/sdk/testsuite"
+	"temporal-crawler/internal/entity"
 	"temporal-crawler/internal/resources/fixtures"
 )
 
@@ -34,8 +35,8 @@ func TestWriteResultActivity(t *testing.T) {
 		},
 	}
 	
-	var book BookInfo
-	var chapter ChapterInfo
+	var book entity.BookInfo
+	var chapter entity.ChapterInfo
 	logs := map[string]string{}
 	
 	nopeWriter := ResultWriter{

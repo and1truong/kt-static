@@ -10,6 +10,7 @@ import (
 	"text/template"
 	
 	"go.temporal.io/sdk/activity"
+	"temporal-crawler/internal/entity"
 	"temporal-crawler/internal/resources"
 	"temporal-crawler/internal/resources/translation"
 )
@@ -53,7 +54,7 @@ func (w *ResultWriter) getWriter() writer {
 	return os.WriteFile
 }
 
-func (w *ResultWriter) WriteResultActivity(ctx context.Context, book BookInfo, chapter ChapterInfo) error {
+func (w *ResultWriter) WriteResultActivity(ctx context.Context, book entity.BookInfo, chapter entity.ChapterInfo) error {
 	logger := activity.GetLogger(ctx)
 	t, err := template.New("chapter").Parse(resources.ChapterTemplateFile)
 	

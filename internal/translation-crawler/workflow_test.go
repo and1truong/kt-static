@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.temporal.io/sdk/testsuite"
 	"temporal-crawler/internal/activities"
+	"temporal-crawler/internal/entity"
 	"temporal-crawler/internal/resources/fixtures"
 )
 
@@ -25,7 +26,7 @@ func _TestBookCrawlerWorkflow(t *testing.T) {
 	
 	require.True(t, env.IsWorkflowCompleted())
 	require.NoError(t, env.GetWorkflowError())
-	var result *TranslationInfo
+	var result *entity.TranslationInfo
 	require.NoError(t, env.GetWorkflowResult(&result))
 	require.Equal(t, "VI1934", result.Name)
 	require.Equal(t, 66, len(result.Books))

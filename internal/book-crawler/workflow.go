@@ -1,11 +1,13 @@
 package book_crawler
 
 import (
+	"context"
 	"time"
 	
 	"github.com/pkg/errors"
 	"go.temporal.io/sdk/workflow"
 	"temporal-crawler/internal/activities"
+	"temporal-crawler/internal/entity"
 	"temporal-crawler/internal/resources/translation"
 )
 
@@ -13,7 +15,7 @@ var (
 	baseUrl = "https://kinhthanh.httlvn.org"
 )
 
-func BookCrawlerWorkflow(ctx workflow.Context, bookInfo BookInfo) (int, error) {
+func BookCrawlerWorkflow(ctx workflow.Context, bookInfo entity.BookInfo) (int, error) {
 	ctx = workflow.WithActivityOptions(ctx, workflow.ActivityOptions{
 		StartToCloseTimeout: 2 * time.Minute,
 	})
@@ -21,6 +23,36 @@ func BookCrawlerWorkflow(ctx workflow.Context, bookInfo BookInfo) (int, error) {
 	var fetchFutures []workflow.Future
 	var parseFutures []workflow.Future
 	var writeFutures []workflow.Future
+	
+	// if full bookInfo is not provided, we should rebuild them
+	if len(bookInfo.Chapters) == 0 {
+		if bookInfo.Tran == "" || bookInfo.BookCode == "" {
+			panic("invalid book info")
+		}
+		
+		var body []byte
+		err := workflow.ExecuteActivity(ctx, activities.FetchActivity, "https://kinhthanh.httlvn.org/?v="+bookInfo.Tran).Get(ctx, &body)
+		if err != nil {
+			return 0, err
+		}
+		
+		// TODO: parse book
+		// func BookListParse(ctx context.Context, tran string, body []byte) (*tc.TranslationInfo, error) {
+		tranInfo, err := BookListParse(context.TODO(), bookInfo.Tran, body)
+		if err != nil {
+			return 0, err
+		}
+		
+		for _, item := range tranInfo.Books {
+			if item.BookCode == bookInfo.BookCode {
+				bookInfo = item
+			}
+		}
+		
+		if len(bookInfo.Chapters) == 0 {
+			panic("book not found")
+		}
+	}
 	
 	// ============================
 	// trigger fetch activities
@@ -52,7 +84,7 @@ func BookCrawlerWorkflow(ctx workflow.Context, bookInfo BookInfo) (int, error) {
 	// ============================
 	writer := ResultWriter{}
 	for _, ft := range parseFutures {
-		var chapter ChapterInfo
+		var chapter entity.ChapterInfo
 		err := ft.Get(ctx, &chapter)
 		if err != nil {
 			return 0, errors.Wrap(err, "failed to get chapter result")

@@ -8,20 +8,21 @@ import (
 	
 	"github.com/PuerkitoBio/goquery"
 	"golang.org/x/net/html"
+	"temporal-crawler/internal/entity"
 	"temporal-crawler/internal/resources/translation"
 )
 
-func BookParseActivity(ctx context.Context, lang translation.LANG, body []byte) (*ChapterInfo, error) {
+func BookParseActivity(ctx context.Context, lang translation.LANG, body []byte) (*entity.ChapterInfo, error) {
 	bodyReader := bytes.NewReader(body)
 	doc, err := goquery.NewDocumentFromReader(bodyReader)
 	if err != nil {
 		return nil, err
 	}
 	
-	chap := &ChapterInfo{
+	chap := &entity.ChapterInfo{
 		Lang:       lang,
 		Number:     0,
-		Blocks:     []Block{},
+		Blocks:     []entity.Block{},
 		AudioLinks: []string{},
 	}
 	
@@ -35,8 +36,8 @@ func BookParseActivity(ctx context.Context, lang translation.LANG, body []byte) 
 	return chap, nil
 }
 
-func parseHtmlDoc(doc *goquery.Document) ([]Block, int, error) {
-	blocks := []Block{}
+func parseHtmlDoc(doc *goquery.Document) ([]entity.Block, int, error) {
+	blocks := []entity.Block{}
 	chapNumber := 0
 	doc.Find(".bible-read > div > *").EachWithBreak(
 		func(i int, selection *goquery.Selection) bool {
@@ -57,10 +58,10 @@ func parseHtmlDoc(doc *goquery.Document) ([]Block, int, error) {
 	return blocks, chapNumber, nil
 }
 
-func parseBlock(selection *goquery.Selection) (Block, int, bool) {
+func parseBlock(selection *goquery.Selection) (entity.Block, int, bool) {
 	attrClass, found := selection.Attr("class")
 	if !found {
-		return Block{}, 0, false
+		return entity.Block{}, 0, false
 	}
 	
 	if strings.Contains(attrClass, "title") {
@@ -72,13 +73,13 @@ func parseBlock(selection *goquery.Selection) (Block, int, bool) {
 	return parseVerse(selection, attrClass), 0, true
 }
 
-func parseTitle(selection *goquery.Selection, attrClass string) (Block, int) {
+func parseTitle(selection *goquery.Selection, attrClass string) (entity.Block, int) {
 	// <h1>1</h1><h3>Lời đạt và chào thăm</h3>
 	chapNumber := 0
-	block := Block{
+	block := entity.Block{
 		Kind:    "title",
 		Classes: strings.Split(attrClass, " "),
-		Content: []InnerBlock{},
+		Content: []entity.InnerBlock{},
 	}
 	
 	selection.FindMatcher(goquery.Single("h1")).Each(
@@ -91,7 +92,7 @@ func parseTitle(selection *goquery.Selection, attrClass string) (Block, int) {
 	
 	selection.FindMatcher(goquery.Single("h3")).Each(
 		func(i int, sub *goquery.Selection) {
-			block.Content = append(block.Content, InnerBlock{
+			block.Content = append(block.Content, entity.InnerBlock{
 				Content:    sub.Text(),
 				References: nil,
 			})
@@ -101,8 +102,8 @@ func parseTitle(selection *goquery.Selection, attrClass string) (Block, int) {
 	return block, chapNumber
 }
 
-func parseVerse(selection *goquery.Selection, attrClass string) Block {
-	block := Block{
+func parseVerse(selection *goquery.Selection, attrClass string) entity.Block {
+	block := entity.Block{
 		Kind:       "verse",
 		Classes:    strings.Split(attrClass, " "),
 		References: []string{},
@@ -148,8 +149,8 @@ func cleanupInnerText(selection *goquery.Selection) (string, string, bool) {
 	return num, txt, newLine
 }
 
-func parseInnerBlocks(txt string) []InnerBlock {
-	var blocks []InnerBlock
+func parseInnerBlocks(txt string) []entity.InnerBlock {
+	var blocks []entity.InnerBlock
 	
 	parts := strings.Split(txt, "<br/>")
 	for _, part := range parts {
@@ -159,8 +160,8 @@ func parseInnerBlocks(txt string) []InnerBlock {
 	return blocks
 }
 
-func parseInnerBlock(txt string) InnerBlock {
-	block := InnerBlock{
+func parseInnerBlock(txt string) entity.InnerBlock {
+	block := entity.InnerBlock{
 		Content:    txt,
 		References: []string{},
 	}

@@ -7,13 +7,7 @@ import (
 	"go.temporal.io/sdk/workflow"
 	"temporal-crawler/internal/activities"
 	book_crawler "temporal-crawler/internal/book-crawler"
-)
-
-type (
-	TranslationInfo struct {
-		Name  string
-		Books []book_crawler.BookInfo
-	}
+	"temporal-crawler/internal/entity"
 )
 
 func TranslationCrawlerWorkflow(ctx workflow.Context, tran string) (map[int]int, error) {
@@ -33,7 +27,7 @@ func TranslationCrawlerWorkflow(ctx workflow.Context, tran string) (map[int]int,
 	// ============================
 	// parse translation information
 	// ============================
-	var transInfo *TranslationInfo
+	var transInfo *entity.TranslationInfo
 	err = workflow.ExecuteActivity(ctx, TranslationParseActivity, tran, body).Get(ctx, &transInfo)
 	if err != nil {
 		return nil, err
