@@ -7,6 +7,9 @@ import (
 //go:embed book-info.jude.json
 var BookInfoJudeJson []byte
 
+//go:embed book-info.nahum.json
+var BookInfoNahumJson []byte
+
 //go:embed chapter.vi.html
 var ChapterSampleViHtml []byte
 
