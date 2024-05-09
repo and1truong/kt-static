@@ -15,11 +15,14 @@ import (
 var rootCmd = &cobra.Command{
 	Use:   "kt-crawler",
 	Short: "KT crawler",
-	Run: func(cmd *cobra.Command, args []string) {
-	},
 }
 
-var TemporalWorkerComand = &cobra.Command{
+var startCmd = &cobra.Command{
+	Use:   "start",
+	Short: "Start a crawler",
+}
+
+var TemporalWorkerCommand = &cobra.Command{
 	Use:   "worker",
 	Short: "worker",
 	Run: func(cmd *cobra.Command, args []string) {
@@ -46,8 +49,11 @@ var TemporalWorkerComand = &cobra.Command{
 }
 
 func main() {
-	rootCmd.AddCommand(book_crawler.TriggerCommand)
-	rootCmd.AddCommand(TemporalWorkerComand)
+	rootCmd.AddCommand(TemporalWorkerCommand)
+	
+	startCmd.AddCommand(book_crawler.TriggerCommand)
+	startCmd.AddCommand(translation_crawler.TriggerCommand)
+	rootCmd.AddCommand(startCmd)
 	
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)

@@ -43,13 +43,13 @@ func TranslationCrawlerWorkflow(ctx workflow.Context, tran string) (map[int]int,
 	// start crawling books
 	// ============================
 	var results []workflow.ChildWorkflowFuture
-	for i, bookInfo := range transInfo.Books {
+	for _, bookInfo := range transInfo.Books {
 		childCtx := workflow.WithChildOptions(ctx, workflow.ChildWorkflowOptions{
 			WorkflowID: fmt.Sprintf(
-				"%s/%s/%d",
+				"%s/%s/%s",
 				workflow.GetInfo(ctx).WorkflowExecution.ID,
 				tran,
-				i,
+				bookInfo.BookCode,
 			),
 		})
 		

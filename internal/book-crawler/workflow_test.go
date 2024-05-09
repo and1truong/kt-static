@@ -42,7 +42,7 @@ func TestWorkflow(t *testing.T) {
 	env.RegisterActivity(nopeWriterActivity())
 	
 	// run it
-	env.ExecuteWorkflow(BookCrawlerWorkflow, mockBookInfo())
+	env.ExecuteWorkflow(BookCrawlerWorkflow, MockBookInfo())
 	
 	require.True(t, env.IsWorkflowCompleted())
 	require.NoError(t, env.GetWorkflowError())
