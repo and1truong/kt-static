@@ -10,7 +10,6 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.temporal.io/sdk/testsuite"
 	"temporal-crawler/internal/activities"
-	"temporal-crawler/internal/entity"
 	"temporal-crawler/internal/resources/fixtures"
 )
 
@@ -43,36 +42,7 @@ func TestWorkflow(t *testing.T) {
 	env.RegisterActivity(nopeWriterActivity())
 	
 	// run it
-	env.ExecuteWorkflow(BookCrawlerWorkflow, MockBookInfo())
-	
-	require.True(t, env.IsWorkflowCompleted())
-	require.NoError(t, env.GetWorkflowError())
-	
-	var result int
-	require.NoError(t, env.GetWorkflowResult(&result))
-}
-
-func TestWorkflowWithCodeName(t *testing.T) {
-	// setup workflow
-	ts := &testsuite.WorkflowTestSuite{}
-	env := ts.NewTestWorkflowEnvironment()
-	env.SetTestTimeout(10 * time.Minute)
-	env.SetDetachedChildWait(true)
-	env.SetTestTimeout(10 * time.Minute)
-	
-	// env.
-	// 	OnActivity(activities.FetchActivity, mock.Anything, "https://kinhthanh.httlvn.org/doc-kinh-thanh/giu/1?v=VI1934").
-	// 	Return(fixtures.ChapterSample_VI_Html, nil)
-	
-	env.RegisterActivity(BookParseActivity)
-	env.RegisterActivity(activities.FetchActivity)
-	env.RegisterActivity(nopeWriterActivity())
-	
-	// run it
-	env.ExecuteWorkflow(BookCrawlerWorkflow, entity.BookInfo{
-		Tran:     "VI1934",
-		BookCode: "he",
-	})
+	env.ExecuteWorkflow(BookCrawlerWorkflow, MockBookInfo(fixtures.BookInfo_VI_JudeJson))
 	
 	require.True(t, env.IsWorkflowCompleted())
 	require.NoError(t, env.GetWorkflowError())

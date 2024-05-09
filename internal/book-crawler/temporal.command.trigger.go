@@ -10,12 +10,12 @@ import (
 	"temporal-crawler/internal/resources/fixtures"
 )
 
-func MockBookInfo() entity.BookInfo {
+func MockBookInfo(content []byte) entity.BookInfo {
 	var book entity.BookInfo
 	var err error
 	
 	// content := fixtures.BookInfo_VI_JudeJson
-	content := fixtures.BookInfo_VI_NahumJson
+	// content := fixtures.BookInfo_VI_NahumJson
 	
 	err = json.Unmarshal(content, &book)
 	if err != nil {
@@ -31,6 +31,11 @@ var TriggerCommand = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var result int
 		
-		return internal.ExecuteTemporalWorkflow(cmd.Context(), BookCrawlerWorkflow, &result, MockBookInfo())
+		return internal.ExecuteTemporalWorkflow(
+			cmd.Context(),
+			BookCrawlerWorkflow,
+			&result,
+			MockBookInfo(fixtures.BookInfo_VI_NahumJson),
+		)
 	},
 }
