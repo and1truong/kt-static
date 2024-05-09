@@ -5,22 +5,22 @@ import (
 )
 
 //go:embed book-info.jude.json
-var BookInfoJudeJson []byte
+var BookInfo_VI_JudeJson []byte
 
 //go:embed book-info.nahum.json
-var BookInfoNahumJson []byte
+var BookInfo_VI_NahumJson []byte
 
 //go:embed chapter.vi.html
-var ChapterSampleViHtml []byte
+var ChapterSample_VI_Html []byte
 
 //go:embed chapter.vi.json
-var ChapterSampleViJson []byte
+var ChapterSample_VI_Json []byte
 
 //go:embed chapter.en.html
-var ChapterSampleEnHtml []byte
+var ChapterSample_EN_Html []byte
 
 //go:embed book-info.jude.json
-var BookSampleJudeJson []byte
+var BookSample_VI_JudeJson []byte
 
 //go:embed fetch.translation.VI1934.html
-var TranslationSampleVI1934Html []byte
+var TranslationSample_VI1934_Html []byte

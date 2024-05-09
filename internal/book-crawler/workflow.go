@@ -6,6 +6,7 @@ import (
 	"github.com/pkg/errors"
 	"go.temporal.io/sdk/workflow"
 	"temporal-crawler/internal/activities"
+	"temporal-crawler/internal/resources/translation"
 )
 
 var (
@@ -41,7 +42,7 @@ func BookCrawlerWorkflow(ctx workflow.Context, bookInfo BookInfo) (int, error) {
 		}
 		
 		// trigger BookParseActivity
-		ft := workflow.ExecuteActivity(ctx, BookParseActivity, body)
+		ft := workflow.ExecuteActivity(ctx, BookParseActivity, translation.Translations[bookInfo.Tran], body)
 		parseFutures = append(parseFutures, ft)
 	}
 	

@@ -13,11 +13,14 @@ import (
 )
 
 func mockBookInfo() BookInfo {
-	// content := fixtures.BookInfoJudeJson
-	content := fixtures.BookInfoNahumJson
-	
 	var book BookInfo
-	if err := json.Unmarshal(content, &book); err != nil {
+	var err error
+	
+	// content := fixtures.BookInfo_VI_JudeJson
+	content := fixtures.BookInfo_VI_NahumJson
+	
+	err = json.Unmarshal(content, &book)
+	if err != nil {
 		panic(err)
 	}
 	

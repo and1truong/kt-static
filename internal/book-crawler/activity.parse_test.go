@@ -10,6 +10,7 @@ import (
 	"github.com/PuerkitoBio/goquery"
 	"github.com/stretchr/testify/require"
 	"temporal-crawler/internal/resources/fixtures"
+	"temporal-crawler/internal/resources/translation"
 )
 
 func TestParseTitle(t *testing.T) {
@@ -27,25 +28,28 @@ func TestParseTitle(t *testing.T) {
 func TestParseActivity(t *testing.T) {
 	type dataset struct {
 		mockHtml []byte
+		lang     translation.LANG
 		audio    int
 		blocks   int
 	}
 	
 	items := []dataset{
 		{
-			mockHtml: fixtures.ChapterSampleViHtml,
+			mockHtml: fixtures.ChapterSample_VI_Html,
+			lang:     translation.VI,
 			audio:    2,
 			blocks:   25,
 		},
 		{
-			mockHtml: fixtures.ChapterSampleEnHtml,
+			mockHtml: fixtures.ChapterSample_EN_Html,
+			lang:     translation.EN,
 			audio:    0,
 			blocks:   25,
 		},
 	}
 	
 	for _, item := range items {
-		chap, err := BookParseActivity(context.Background(), item.mockHtml)
+		chap, err := BookParseActivity(context.Background(), item.lang, item.mockHtml)
 		require.NoError(t, err)
 		require.Len(t, chap.AudioLinks, item.audio)
 		require.Greater(t, len(chap.Blocks), item.blocks)

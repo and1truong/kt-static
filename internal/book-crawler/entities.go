@@ -3,6 +3,8 @@ package book_crawler
 import (
 	"fmt"
 	"strings"
+	
+	"temporal-crawler/internal/resources/translation"
 )
 
 type (
@@ -17,6 +19,7 @@ type (
 	}
 	
 	ChapterInfo struct {
+		Lang       translation.LANG
 		Number     int
 		Blocks     []Block
 		AudioLinks []string
@@ -38,7 +41,7 @@ type (
 )
 
 func (chap ChapterInfo) String() string {
-	out := fmt.Sprintf("# Chapter %d\n\n", chap.Number)
+	out := fmt.Sprintf("# %s %d\n\n", translation.Get("Chapter", chap.Lang), chap.Number)
 	
 	for _, block := range chap.Blocks {
 		out += block.String()

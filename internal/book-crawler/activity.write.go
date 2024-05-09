@@ -11,6 +11,7 @@ import (
 	
 	"go.temporal.io/sdk/activity"
 	"temporal-crawler/internal/resources"
+	"temporal-crawler/internal/resources/translation"
 )
 
 type (
@@ -18,7 +19,7 @@ type (
 		BookName        string
 		ChapterNumber   int
 		TranslationName string
-		LanguageName    string
+		LanguageName    translation.LANG
 		Slug            string
 		Content         string
 	}
@@ -65,7 +66,7 @@ func (w *ResultWriter) WriteResultActivity(ctx context.Context, book BookInfo, c
 		BookName:        book.BookName,
 		ChapterNumber:   chapter.Number,
 		TranslationName: book.Tran,
-		LanguageName:    "TODO",
+		LanguageName:    translation.Translations[book.Tran],
 		Slug:            fmt.Sprintf("/%s/%d/%s", book.BookCode, chapter.Number, book.Tran),
 		Content:         chapter.String(),
 	}

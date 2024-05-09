@@ -21,8 +21,8 @@ type writeTestData struct {
 func TestWriteResultActivity(t *testing.T) {
 	items := []writeTestData{
 		{
-			bookRaw:    fixtures.BookSampleJudeJson,
-			chapterRaw: fixtures.ChapterSampleViJson,
+			bookRaw:    fixtures.BookSample_VI_JudeJson,
+			chapterRaw: fixtures.ChapterSample_VI_Json,
 			resultPath: "/build/static/VI1934/giu/1.md",
 			resultContains: []string{
 				"title: Giu-đe  1",

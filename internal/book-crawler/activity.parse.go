@@ -8,9 +8,10 @@ import (
 	
 	"github.com/PuerkitoBio/goquery"
 	"golang.org/x/net/html"
+	"temporal-crawler/internal/resources/translation"
 )
 
-func BookParseActivity(ctx context.Context, body []byte) (*ChapterInfo, error) {
+func BookParseActivity(ctx context.Context, lang translation.LANG, body []byte) (*ChapterInfo, error) {
 	bodyReader := bytes.NewReader(body)
 	doc, err := goquery.NewDocumentFromReader(bodyReader)
 	if err != nil {
@@ -18,6 +19,7 @@ func BookParseActivity(ctx context.Context, body []byte) (*ChapterInfo, error) {
 	}
 	
 	chap := &ChapterInfo{
+		Lang:       lang,
 		Number:     0,
 		Blocks:     []Block{},
 		AudioLinks: []string{},

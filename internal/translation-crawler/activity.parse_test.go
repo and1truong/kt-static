@@ -18,7 +18,7 @@ func TestParseActivity(t *testing.T) {
 	env.SetTestTimeout(10 * time.Minute)
 	env.RegisterActivity(TranslationParseActivity)
 	
-	val, err := env.ExecuteActivity(TranslationParseActivity, "VI1934", fixtures.TranslationSampleVI1934Html)
+	val, err := env.ExecuteActivity(TranslationParseActivity, "VI1934", fixtures.TranslationSample_VI1934_Html)
 	require.NoError(t, err)
 	
 	var result *TranslationInfo

@@ -19,7 +19,7 @@ func _TestBookCrawlerWorkflow(t *testing.T) {
 	env.SetTestTimeout(10 * time.Minute)
 	env.
 		OnActivity(activities.FetchActivity, mock.Anything, "https://kinhthanh.httlvn.org/?v=VI1934").
-		Return(fixtures.TranslationSampleVI1934Html, nil)
+		Return(fixtures.TranslationSample_VI1934_Html, nil)
 	env.RegisterActivity(TranslationParseActivity)
 	env.ExecuteWorkflow(TranslationCrawlerWorkflow, "VI1934")
 	
