@@ -1,7 +1,9 @@
 {
+	"Tran":       "VI1934",
 	"BookNumber": 65,
+	"BookCode":   "giu",
 	"BookName":   "Giu-đe ",
 	"Chapters":   ["/doc-kinh-thanh/giu/1?v=VI1934"],
-	"Group":      "",
+	"Group":      "CÁC THƯ TÍN",
 	"Testament":  "TÂN ƯỚC"
 }

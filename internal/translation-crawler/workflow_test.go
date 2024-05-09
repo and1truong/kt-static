@@ -19,7 +19,7 @@ func _TestBookCrawlerWorkflow(t *testing.T) {
 	env.SetTestTimeout(10 * time.Minute)
 	mockHTML, err := os.ReadFile("resources/fixtures/fetch.translation.VI1934.html")
 	env.OnActivity(activities.FetchActivity, mock.Anything, "https://kinhthanh.httlvn.org/?v=VI1934").Return(mockHTML, err)
-	env.RegisterActivity(ParseActivity)
+	env.RegisterActivity(TranslationParseActivity)
 	env.ExecuteWorkflow(TranslationCrawlerWorkflow, "VI1934")
 	
 	require.True(t, env.IsWorkflowCompleted())

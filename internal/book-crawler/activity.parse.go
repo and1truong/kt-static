@@ -10,7 +10,7 @@ import (
 	"golang.org/x/net/html"
 )
 
-func ParseActivity(ctx context.Context, body []byte) (*ChapterInfo, error) {
+func BookParseActivity(ctx context.Context, body []byte) (*ChapterInfo, error) {
 	bodyReader := bytes.NewReader(body)
 	doc, err := goquery.NewDocumentFromReader(bodyReader)
 	if err != nil {
@@ -138,6 +138,7 @@ func cleanupInnerText(selection *goquery.Selection) (string, string, bool) {
 	
 	txt = strings.Trim(txt, "  ")
 	txt = strings.Replace(txt, " ", " ", -1)
+	txt = strings.Replace(txt, " ", " ", -1)
 	txt = strings.Replace(txt, "Jêsus", "Giê-su", -1)
 	txt = strings.Replace(txt, "Christ", "Cơ-đốc", -1)
 	txt = strings.Replace(txt, "nầy", "này", -1)

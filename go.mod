@@ -4,7 +4,10 @@ go 1.22.2
 
 require (
 	github.com/PuerkitoBio/goquery v1.9.2
+	github.com/pkg/errors v0.8.1
+	github.com/stretchr/testify v1.9.0
 	go.temporal.io/sdk v1.26.1
+	golang.org/x/net v0.24.0
 )
 
 require (
@@ -20,10 +23,8 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/robfig/cron v1.2.0 // indirect
 	github.com/stretchr/objx v0.5.2 // indirect
-	github.com/stretchr/testify v1.9.0 // indirect
 	go.temporal.io/api v1.32.0 // indirect
 	golang.org/x/exp v0.0.0-20231127185646-65229373498e // indirect
-	golang.org/x/net v0.24.0 // indirect
 	golang.org/x/sys v0.19.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	golang.org/x/time v0.3.0 // indirect

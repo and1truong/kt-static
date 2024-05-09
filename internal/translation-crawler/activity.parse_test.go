@@ -16,14 +16,14 @@ func TestParseActivity(t *testing.T) {
 	ts := &testsuite.WorkflowTestSuite{}
 	env := ts.NewTestActivityEnvironment()
 	env.SetTestTimeout(10 * time.Minute)
-	env.RegisterActivity(ParseActivity)
+	env.RegisterActivity(TranslationParseActivity)
 	
 	content, err := os.ReadFile("resources/fixtures/fetch.translation.VI1934.html")
 	if err != nil {
 		panic(err)
 	}
 	
-	val, err := env.ExecuteActivity(ParseActivity, "VI1934", content)
+	val, err := env.ExecuteActivity(TranslationParseActivity, "VI1934", content)
 	require.NoError(t, err)
 	
 	var result *TranslationInfo
@@ -34,7 +34,14 @@ func TestParseActivity(t *testing.T) {
 	require.Equal(t, "Sáng-thế Ký", strings.Trim(result.Books[0].BookName, " "))
 	
 	if false {
-		out, _ := json.Marshal(result.Books[64])
-		fmt.Println(string(out))
+		{
+			out, _ := json.Marshal(result.Books[18])
+			fmt.Println(string(out))
+		}
+		
+		{
+			out, _ := json.Marshal(result.Books[64])
+			fmt.Println(string(out))
+		}
 	}
 }

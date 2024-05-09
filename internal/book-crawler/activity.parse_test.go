@@ -2,6 +2,7 @@ package book_crawler
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"strings"
 	"testing"
@@ -43,13 +44,22 @@ func TestParseActivity(t *testing.T) {
 	}
 	
 	for _, item := range items {
-		chap, err := ParseActivity(context.Background(), mockFetchResponse(item.path))
+		chap, err := BookParseActivity(context.Background(), mockFetchResponse(item.path))
 		require.NoError(t, err)
 		require.Len(t, chap.AudioLinks, item.audio)
 		require.Greater(t, len(chap.Blocks), item.blocks)
 		
 		if false {
-			fmt.Print(chap)
+			// encode result for next activity
+			chapBytes, err := json.Marshal(chap)
+			require.NoError(t, err)
+			
+			fmt.Println(string(chapBytes), "\n ===\n ")
+		}
+		
+		if false {
+			// debug output
+			fmt.Println(chap)
 		}
 	}
 }

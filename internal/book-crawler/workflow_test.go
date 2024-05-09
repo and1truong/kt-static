@@ -2,6 +2,7 @@ package book_crawler
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"testing"
 	"time"
@@ -37,6 +38,19 @@ func mockFetchResponse(path string) []byte {
 	return mockHTML
 }
 
+func nopeWriterActivity() any {
+	writer := ResultWriter{
+		writer: func(name string, data []byte, perm os.FileMode) error {
+			fmt.Println("ResultWriter › write", name, string(data))
+			
+			return nil
+			
+		},
+	}
+	
+	return writer.ActivityHandler
+}
+
 func TestWorkflow(t *testing.T) {
 	// setup workflow
 	ts := &testsuite.WorkflowTestSuite{}
@@ -47,7 +61,8 @@ func TestWorkflow(t *testing.T) {
 	env.
 		OnActivity(activities.FetchActivity, mock.Anything, "https://kinhthanh.httlvn.org/doc-kinh-thanh/giu/1?v=VI1934").
 		Return(mockFetchResponse("resources/fixtures/chapter.vi.html"), nil)
-	env.RegisterActivity(ParseActivity)
+	env.RegisterActivity(BookParseActivity)
+	env.RegisterActivity(nopeWriterActivity())
 	
 	// run it
 	env.ExecuteWorkflow(BookCrawlerWorkflow, mockBookInfo())

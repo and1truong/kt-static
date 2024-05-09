@@ -1,0 +1,347 @@
+{
+	"Number":     1,
+	"Blocks":     [
+		{
+			"Kind":       "title",
+			"Number":     "",
+			"Content":    [{ "Content": "Lời đạt và chào thăm", "References": null }],
+			"Classes":    ["title"],
+			"References": null,
+			"NewLine":    false
+		},
+		{
+			"Kind":       "verse",
+			"Number":     "1",
+			"Content":    [
+				{
+					"Content":    "Giu-đe, tôi tớ của Đức Chúa Giê-su Cơ-đốc và em Gia-cơ, đạt cho những kẻ đã được kêu gọi, được Đức Chúa Trời, là Cha, yêu thương, và được Đức Chúa Giê-su Cơ-đốc giữ gìn:",
+					"References": ["Mat 13:55", "Mac 6:3"]
+				}
+			],
+			"Classes":    ["verse", "giu_1_1"],
+			"References": [],
+			"NewLine":    false
+		},
+		{
+			"Kind":       "verse",
+			"Number":     "2",
+			"Content":    [
+				{ "Content": "nguyền xin sự thương xót, bình an, yêu mến thêm lên cho anh em!", "References": [] }
+			],
+			"Classes":    ["verse", "giu_1_2"],
+			"References": [],
+			"NewLine":    true
+		},
+		{
+			"Kind":       "title",
+			"Number":     "",
+			"Content":    [{ "Content": "Đạo giả và thầy dối", "References": null }],
+			"Classes":    ["title"],
+			"References": null,
+			"NewLine":    false
+		},
+		{
+			"Kind":       "verse",
+			"Number":     "3",
+			"Content":    [
+				{
+					"Content":    "Hỡi kẻ rất yêu dấu, vì tôi đã ân cần viết cho anh em về sự cứu rỗi chung của chúng ta, tôi tưởng phải làm điều đó, để khuyên anh em vì đạo mà tranh chiến, là đạo đã truyền cho các thánh một lần đủ rồi.",
+					"References": []
+				}
+			],
+			"Classes":    ["verse", "giu_1_3"],
+			"References": [],
+			"NewLine":    false
+		},
+		{
+			"Kind":       "verse",
+			"Number":     "4",
+			"Content":    [
+				{
+					"Content":    "Vì có mấy kẻ kia lẻn vào trong vòng chúng ta, là những kẻ bị định đoán phạt từ lâu rồi, kẻ chẳng tin kính đổi ơn Đức Chúa Trời chúng ta ra việc tà ác, chối Đấng Chủ tể và Chúa có một của chúng ta, là Đức Chúa Giê-su Cơ-đốc.",
+					"References": ["Xem chú thích ở Lu 2:40"]
+				}
+			],
+			"Classes":    ["verse", "giu_1_4"],
+			"References": [],
+			"NewLine":    true
+		},
+		{
+			"Kind":       "verse",
+			"Number":     "5",
+			"Content":    [
+				{
+					"Content":    "Dầu anh em đã học những điều này rồi, tôi cũng muốn nhắc lại cho anh em rằng, xưa kia Chúa giải cứu dân mình ra khỏi xứ Ê-díp-tô, sau lại tiêu diệt những kẻ không tin;",
+					"References": ["Xu 12:51", "Dan 14:29-30"]
+				}
+			],
+			"Classes":    ["verse", "giu_1_5"],
+			"References": [],
+			"NewLine":    false
+		},
+		{
+			"Kind":       "verse",
+			"Number":     "6",
+			"Content":    [
+				{
+					"Content":    "còn các thiên sứ không giữ thứ bậc và bỏ chỗ riêng mình, thì Ngài đã dùng dây xích họ trong nơi tối tăm đời đời, cầm giữ lại để chờ sự phán xét ngày lớn.",
+					"References": []
+				}
+			],
+			"Classes":    ["verse", "giu_1_6"],
+			"References": [],
+			"NewLine":    false
+		},
+		{
+			"Kind":       "verse",
+			"Number":     "7",
+			"Content":    [
+				{
+					"Content":    "Lại như thành Sô-đôm và Gô-mô-rơ cùng các thành lân cận cũng buông theo sự dâm dục và sắc lạ, thì đã chịu hình phạt bằng lửa đời đời, làm gương để trước mặt chúng ta.",
+					"References": ["Sa 19:1-24"]
+				}
+			],
+			"Classes":    ["verse", "giu_1_7"],
+			"References": [],
+			"NewLine":    false
+		},
+		{
+			"Kind":       "verse",
+			"Number":     "8",
+			"Content":    [
+				{
+					"Content":    "Nhưng mà chúng nó cũng như vậy, trong giấc mơ màng làm ô uế xác thịt mình, khinh dể quyền phép rất cao và nói hỗn các đấng tôn trọng.",
+					"References": []
+				}
+			],
+			"Classes":    ["verse", "giu_1_8"],
+			"References": [],
+			"NewLine":    false
+		},
+		{
+			"Kind":       "verse",
+			"Number":     "9",
+			"Content":    [
+				{
+					"Content":    "Vả, khi chính mình thiên sứ trưởng Mi-chen chống với ma quỉ giành xác Môi-se, còn chẳng dám lấy lời nhiếc móc mà đoán phạt; người chỉ nói rằng: Cầu Chúa phạt ngươi!",
+					"References": ["Da 10:13,21", "12:1", "Kh 12:7", "Phu 34:6", "Xa 3:2"]
+				}
+			],
+			"Classes":    ["verse", "giu_1_9"],
+			"References": [],
+			"NewLine":    false
+		},
+		{
+			"Kind":       "verse",
+			"Number":     "10",
+			"Content":    [
+				{
+					"Content":    "Song những kẻ này, hễ điều gì không biết thì khinh dể hết; và mọi điều chúng nó tự nhiên mà biết cũng như con thú vật vô tri, thì dùng mà làm hư mình.",
+					"References": []
+				}
+			],
+			"Classes":    ["verse", "giu_1_10"],
+			"References": [],
+			"NewLine":    false
+		},
+		{
+			"Kind":       "verse",
+			"Number":     "11",
+			"Content":    [
+				{
+					"Content":    "Khốn nạn thay cho chúng nó, vì đã theo đường của Ca-in, lấy lòng tham lợi mà gieo mình vào sự sai lạc của Ba-la-am; và bị hư mất về sự phản nghịch của Cô-rê.",
+					"References": ["Sa 4:3-8", "Dan 22:1-35", "16:1-35"]
+				}
+			],
+			"Classes":    ["verse", "giu_1_11"],
+			"References": [],
+			"NewLine":    true
+		},
+		{
+			"Kind":       "verse",
+			"Number":     "12",
+			"Content":    [
+				{
+					"Content":    "Những kẻ đó là dấu vít trong đám tiệc anh em, như người chăn chiên chỉ tưởng nuôi mình cho no nê, không lo sợ gì; như đám mây không nước, theo gió đưa đi đây đi đó, như cây tàn mùa thu, không có trái, hai lần chết, trốc lên bựt rễ;",
+					"References": []
+				}
+			],
+			"Classes":    ["verse", "giu_1_12"],
+			"References": [],
+			"NewLine":    false
+		},
+		{
+			"Kind":       "verse",
+			"Number":     "13",
+			"Content":    [
+				{
+					"Content":    "như sóng cuồng dưới biển, sôi bọt ô uế của mình; như sao đi lạc, sự tối tăm mù mịt đã dành cho chúng nó đời đời!",
+					"References": []
+				}
+			],
+			"Classes":    ["verse", "giu_1_13"],
+			"References": [],
+			"NewLine":    false
+		},
+		{
+			"Kind":       "verse",
+			"Number":     "14",
+			"Content":    [
+				{
+					"Content":    "Ấy cũng vì họ mà Hê-nóc, là tổ bảy đời kể từ A-đam, đã nói tiên tri rằng:",
+					"References": ["Sa 5:18,21-24"]
+				}
+			],
+			"Classes":    ["verse", "giu_1_14"],
+			"References": [],
+			"NewLine":    false
+		},
+		{
+			"Kind":       "verse",
+			"Number":     "15",
+			"Content":    [
+				{
+					"Content":    "Nầy, Chúa ngự đến với muôn vàn thánh, đặng phán xét mọi người, đặng trách hết thảy những người không tin kính về mọi việc không tin kính họ đã phạm, cùng mọi lời sỉ hổ mà những kẻ có tội không tin kính đó đã nói nghịch cùng Ngài.",
+					"References": []
+				}
+			],
+			"Classes":    ["verse", "giu_1_15"],
+			"References": [],
+			"NewLine":    false
+		},
+		{
+			"Kind":       "verse",
+			"Number":     "16",
+			"Content":    [
+				{
+					"Content":    "Ấy đều là những kẻ hay lằm bằm, hay phàn nàn luôn về số phận mình, làm theo sự ham muốn mình, miệng đầy những lời kiêu căng, và vì lợi mà nịnh hót người ta.",
+					"References": []
+				}
+			],
+			"Classes":    ["verse", "giu_1_16"],
+			"References": [],
+			"NewLine":    true
+		},
+		{
+			"Kind":       "verse",
+			"Number":     "17",
+			"Content":    [
+				{
+					"Content":    "Nhưng anh em, là kẻ rất yêu dấu, hãy nhớ lấy những lời mà các sứ đồ của Đức Chúa Giê-su Cơ-đốc chúng ta đã nói trước.",
+					"References": []
+				}
+			],
+			"Classes":    ["verse", "giu_1_17"],
+			"References": [],
+			"NewLine":    false
+		},
+		{
+			"Kind":       "verse",
+			"Number":     "18",
+			"Content":    [
+				{
+					"Content":    "Các sứ đồ đó nói với anh em rằng, trong các thời kỳ sau rốt, sẽ có mấy người hay nhạo báng làm theo lòng ham muốn không tin kính của mình.",
+					"References": ["2Phi 3:3"]
+				}
+			],
+			"Classes":    ["verse", "giu_1_18"],
+			"References": [],
+			"NewLine":    false
+		},
+		{
+			"Kind":       "verse",
+			"Number":     "19",
+			"Content":    [
+				{
+					"Content":    "Ấy chính chúng nó là kẻ gây nên phe đảng, thuộc về tánh xác thịt, không có Đức Thánh Linh.",
+					"References": []
+				}
+			],
+			"Classes":    ["verse", "giu_1_19"],
+			"References": [],
+			"NewLine":    true
+		},
+		{
+			"Kind":       "title",
+			"Number":     "",
+			"Content":    [{ "Content": "Khuyên về sự bền đỗ", "References": null }],
+			"Classes":    ["title"],
+			"References": null,
+			"NewLine":    false
+		},
+		{
+			"Kind":       "verse",
+			"Number":     "20",
+			"Content":    [
+				{
+					"Content":    "Hỡi kẻ rất yêu dấu, về phần anh em, hãy tự lập lấy trên nền đức tin rất thánh của mình, và nhân Đức Thánh Linh mà cầu nguyện,",
+					"References": []
+				}
+			],
+			"Classes":    ["verse", "giu_1_20"],
+			"References": [],
+			"NewLine":    false
+		},
+		{
+			"Kind":       "verse",
+			"Number":     "21",
+			"Content":    [
+				{
+					"Content":    "hãy giữ mình trong sự yêu mến Đức Chúa Trời, và trông đợi sự thương xót của Đức Chúa Giê-su Cơ-đốc chúng ta cho được sự sống đời đời.",
+					"References": []
+				}
+			],
+			"Classes":    ["verse", "giu_1_21"],
+			"References": [],
+			"NewLine":    false
+		},
+		{
+			"Kind":       "verse",
+			"Number":     "22",
+			"Content":    [{ "Content": "Hãy trách phạt những kẻ này, là kẻ trù trừ,", "References": [] }],
+			"Classes":    ["verse", "giu_1_22"],
+			"References": [],
+			"NewLine":    false
+		},
+		{
+			"Kind":       "verse",
+			"Number":     "23",
+			"Content":    [
+				{
+					"Content":    "hãy cứu vớt những kẻ kia, rút họ ra khỏi lửa; còn đối với kẻ khác, hãy có lòng thương lẫn với sợ, ghét cả đến cái áo bị xác thịt làm ô uế.",
+					"References": []
+				}
+			],
+			"Classes":    ["verse", "giu_1_23"],
+			"References": [],
+			"NewLine":    true
+		},
+		{
+			"Kind":       "verse",
+			"Number":     "24",
+			"Content":    [
+				{
+					"Content":    "Vả, nguyền Đấng có thể gìn giữ anh em khỏi vấp phạm và khiến anh em đứng trước mặt vinh hiển mình cách rất vui mừng, không chỗ trách được,",
+					"References": []
+				}
+			],
+			"Classes":    ["verse", "giu_1_24"],
+			"References": [],
+			"NewLine":    false
+		},
+		{
+			"Kind":       "verse",
+			"Number":     "25",
+			"Content":    [
+				{
+					"Content":    "là Đức Chúa Trời có một, là Cứu Chúa chúng ta, bởi Đức Chúa Giê-su Cơ-đốc là Chúa chúng ta, được sự vinh hiển, tôn trọng, thế lực, quyền năng thuộc về Ngài từ trước vô cùng và hiện nay cho đến đời đời! A-men.",
+					"References": []
+				}
+			],
+			"Classes":    ["verse", "giu_1_25"],
+			"References": [],
+			"NewLine":    true
+		}
+	],
+	"AudioLinks": ["\\Audio\\VI1934\\1-ms-nguyen-thi\\giu\\1.mp3", "\\Audio\\VI1934\\2-ms-david-dong\\giu\\1.mp3"]
+}
