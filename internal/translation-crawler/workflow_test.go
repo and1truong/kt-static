@@ -1,7 +1,6 @@
 package translation_crawler
 
 import (
-	"os"
 	"strings"
 	"testing"
 	"time"
@@ -10,6 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.temporal.io/sdk/testsuite"
 	"temporal-crawler/internal/activities"
+	"temporal-crawler/internal/resources/fixtures"
 )
 
 func _TestBookCrawlerWorkflow(t *testing.T) {
@@ -17,8 +17,9 @@ func _TestBookCrawlerWorkflow(t *testing.T) {
 	env := ts.NewTestWorkflowEnvironment()
 	env.SetDetachedChildWait(true)
 	env.SetTestTimeout(10 * time.Minute)
-	mockHTML, err := os.ReadFile("resources/fixtures/fetch.translation.VI1934.html")
-	env.OnActivity(activities.FetchActivity, mock.Anything, "https://kinhthanh.httlvn.org/?v=VI1934").Return(mockHTML, err)
+	env.
+		OnActivity(activities.FetchActivity, mock.Anything, "https://kinhthanh.httlvn.org/?v=VI1934").
+		Return(fixtures.TranslationSampleVI1934Html, nil)
 	env.RegisterActivity(TranslationParseActivity)
 	env.ExecuteWorkflow(TranslationCrawlerWorkflow, "VI1934")
 	

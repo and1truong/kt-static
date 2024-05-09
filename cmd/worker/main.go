@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"os"
 	
 	"go.temporal.io/sdk/client"
 	"go.temporal.io/sdk/worker"
@@ -30,12 +31,14 @@ func main() {
 	}
 	
 	{
-		writer := book_crawler.ResultWriter{}
+		wd, _ := os.Getwd()
+		writer := book_crawler.NewResultWriter(nil, wd)
 		w.RegisterWorkflow(book_crawler.BookCrawlerWorkflow)
 		w.RegisterActivity(book_crawler.BookParseActivity)
-		w.RegisterActivity(writer.ActivityHandler)
+		w.RegisterActivity(writer.WriteResultActivity)
 	}
 	
+	// log.Println("Started Workflow Execution", "WorkflowID", w.GetID(), "RunID", w.GetRunID())
 	if err := w.Run(worker.InterruptCh()); err != nil {
 		log.Fatalln("Unable to start worker", err)
 	}

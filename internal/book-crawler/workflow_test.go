@@ -6,49 +6,37 @@ import (
 	"os"
 	"testing"
 	"time"
-	
+
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"go.temporal.io/sdk/testsuite"
 	"temporal-crawler/internal/activities"
+	"temporal-crawler/internal/resources/fixtures"
 )
 
 func mockBookInfo() BookInfo {
-	content, err := os.ReadFile("resources/fixtures/book-info.jude.json")
-	if err != nil {
-		panic(err)
-	}
-	
 	var book BookInfo
-	err = json.Unmarshal(content, &book)
-	if err != nil {
-		panic(err)
-	}
-	
-	return book
-}
+	var err error
 
-func mockFetchResponse(path string) []byte {
-	mockHTML, err := os.ReadFile(path)
-	
+	err = json.Unmarshal(fixtures.BookSampleJudeJson, &book)
 	if err != nil {
 		panic(err)
 	}
-	
-	return mockHTML
+
+	return book
 }
 
 func nopeWriterActivity() any {
 	writer := ResultWriter{
 		writer: func(name string, data []byte, perm os.FileMode) error {
 			fmt.Println("ResultWriter › write", name, string(data))
-			
+
 			return nil
-			
+
 		},
 	}
-	
-	return writer.ActivityHandler
+
+	return writer.WriteResultActivity
 }
 
 func TestWorkflow(t *testing.T) {
@@ -60,16 +48,16 @@ func TestWorkflow(t *testing.T) {
 	env.SetTestTimeout(10 * time.Minute)
 	env.
 		OnActivity(activities.FetchActivity, mock.Anything, "https://kinhthanh.httlvn.org/doc-kinh-thanh/giu/1?v=VI1934").
-		Return(mockFetchResponse("resources/fixtures/chapter.vi.html"), nil)
+		Return(fixtures.ChapterSampleViHtml, nil)
 	env.RegisterActivity(BookParseActivity)
 	env.RegisterActivity(nopeWriterActivity())
-	
+
 	// run it
 	env.ExecuteWorkflow(BookCrawlerWorkflow, mockBookInfo())
-	
+
 	require.True(t, env.IsWorkflowCompleted())
 	require.NoError(t, env.GetWorkflowError())
-	
+
 	var result int
 	require.NoError(t, env.GetWorkflowResult(&result))
 }

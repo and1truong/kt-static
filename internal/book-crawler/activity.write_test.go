@@ -8,11 +8,12 @@ import (
 	
 	"github.com/stretchr/testify/require"
 	"go.temporal.io/sdk/testsuite"
+	"temporal-crawler/internal/resources/fixtures"
 )
 
 type writeTestData struct {
-	bookPath       string
-	chapterPath    string
+	bookRaw        []byte
+	chapterRaw     []byte
 	resultPath     string
 	resultContains []string
 }
@@ -20,9 +21,9 @@ type writeTestData struct {
 func TestWriteResultActivity(t *testing.T) {
 	items := []writeTestData{
 		{
-			bookPath:    "resources/fixtures/book-info.jude.json",
-			chapterPath: "resources/fixtures/chapter.vi.json",
-			resultPath:  "../../build/VI1934/giu/1.html",
+			bookRaw:    fixtures.BookSampleJudeJson,
+			chapterRaw: fixtures.ChapterSampleViHtml,
+			resultPath: "../../build/VI1934/giu/1.html",
 			resultContains: []string{
 				"title: Giu-đe  1",
 				"book: Giu-đe",
@@ -49,18 +50,13 @@ func TestWriteResultActivity(t *testing.T) {
 	ts := &testsuite.WorkflowTestSuite{}
 	env := ts.NewTestActivityEnvironment()
 	env.SetTestTimeout(10 * time.Minute)
-	env.RegisterActivity(nopeWriter.ActivityHandler)
+	env.RegisterActivity(nopeWriter.WriteResultActivity)
 	
 	for _, item := range items {
-		bookRaw, bookErr := os.ReadFile(item.bookPath)
-		chapterRaw, chapterErr := os.ReadFile(item.chapterPath)
-		require.NoError(t, bookErr)
-		require.NoError(t, chapterErr)
+		json.Unmarshal(item.bookRaw, &book)
+		json.Unmarshal(item.chapterRaw, &chapter)
 		
-		json.Unmarshal(bookRaw, &book)
-		json.Unmarshal(chapterRaw, &chapter)
-		
-		_, err := env.ExecuteActivity(nopeWriter.ActivityHandler, book, chapter)
+		_, err := env.ExecuteActivity(nopeWriter.WriteResultActivity, book, chapter)
 		require.NoError(t, err)
 		
 		log := logs[item.resultPath]

@@ -3,13 +3,13 @@ package translation_crawler
 import (
 	"encoding/json"
 	"fmt"
-	"os"
 	"strings"
 	"testing"
 	"time"
 	
 	"github.com/stretchr/testify/require"
 	"go.temporal.io/sdk/testsuite"
+	"temporal-crawler/internal/resources/fixtures"
 )
 
 func TestParseActivity(t *testing.T) {
@@ -18,12 +18,7 @@ func TestParseActivity(t *testing.T) {
 	env.SetTestTimeout(10 * time.Minute)
 	env.RegisterActivity(TranslationParseActivity)
 	
-	content, err := os.ReadFile("resources/fixtures/fetch.translation.VI1934.html")
-	if err != nil {
-		panic(err)
-	}
-	
-	val, err := env.ExecuteActivity(TranslationParseActivity, "VI1934", content)
+	val, err := env.ExecuteActivity(TranslationParseActivity, "VI1934", fixtures.TranslationSampleVI1934Html)
 	require.NoError(t, err)
 	
 	var result *TranslationInfo

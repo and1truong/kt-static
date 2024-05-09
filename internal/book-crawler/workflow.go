@@ -57,7 +57,7 @@ func BookCrawlerWorkflow(ctx workflow.Context, bookInfo BookInfo) (int, error) {
 			return 0, errors.Wrap(err, "failed to get chapter result")
 		}
 		
-		ft := workflow.ExecuteActivity(ctx, writer.ActivityHandler, bookInfo, chapter)
+		ft := workflow.ExecuteActivity(ctx, writer.WriteResultActivity, bookInfo, chapter)
 		writeFutures = append(writeFutures, ft)
 	}
 	

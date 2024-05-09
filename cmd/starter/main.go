@@ -8,8 +8,39 @@ import (
 	
 	"go.temporal.io/sdk/client"
 	book_crawler "temporal-crawler/internal/book-crawler"
-	"temporal-crawler/internal/book-crawler/resources/fixtures"
+	"temporal-crawler/internal/resources/fixtures"
 )
+
+func main() {
+	c, err := client.Dial(client.Options{})
+	if err != nil {
+		panic(err)
+	} else {
+		defer c.Close()
+	}
+	
+	wfOptions := client.StartWorkflowOptions{TaskQueue: "kt-crawling"}
+	ctx := context.Background()
+	
+	bookInfo := mockBookInfo()
+	process, err := c.ExecuteWorkflow(ctx, wfOptions, book_crawler.BookCrawlerWorkflow, bookInfo)
+	
+	if err != nil {
+		log.Fatalln("Failure starting workflow", err)
+	} else {
+		log.Println("Started Workflow Execution", "WorkflowID", process.GetID(), "RunID", process.GetRunID())
+	}
+	
+	// Wait for Workflow Execution completion.
+	// This is rarely needed in real use cases as batch workflows are usually long-running.
+	var result int
+	err = process.Get(ctx, &result)
+	if err != nil {
+		panic(err)
+	}
+	
+	log.Println("Completed workflow", "WorkflowID", process.GetID(), "RunID", process.GetRunID(), "Result", result)
+}
 
 func mockBookInfo() book_crawler.BookInfo {
 	content := fixtures.BookInfoJudeJson
@@ -20,35 +51,4 @@ func mockBookInfo() book_crawler.BookInfo {
 	}
 	
 	return book
-}
-
-func main() {
-	c, err := client.Dial(client.Options{})
-	if err != nil {
-		panic(err)
-	}
-	defer c.Close()
-	
-	workflowOptions := client.StartWorkflowOptions{
-		TaskQueue: "batch-sliding-window",
-	}
-	ctx := context.Background()
-	we, err := c.ExecuteWorkflow(ctx, workflowOptions, batch_sliding_window.ProcessBatchWorkflow, batch_sliding_window.ProcessBatchWorkflowInput{
-		PageSize:          5,
-		SlidingWindowSize: 10,
-		Partitions:        3,
-	})
-	if err != nil {
-		log.Fatalln("Failure starting workflow", err)
-	}
-	log.Println("Started Workflow Execution", "WorkflowID", we.GetID(), "RunID", we.GetRunID())
-	
-	// Wait for Workflow Execution completion.
-	// This is rarely needed in real use cases as batch workflows are usually long-running.
-	var result int
-	err = we.Get(ctx, &result)
-	if err != nil {
-		panic(err)
-	}
-	log.Println("Completed workflow", "WorkflowID", we.GetID(), "RunID", we.GetRunID(), "Result", result)
 }
