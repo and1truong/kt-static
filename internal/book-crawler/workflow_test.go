@@ -23,7 +23,6 @@ func nopeWriterActivity() any {
 			
 			return nil
 		},
-		"",
 		false,
 	)
 	
@@ -43,6 +42,17 @@ func TestWorkflow(t *testing.T) {
 	env.RegisterWorkflow(chapter_crawler.ChapterCrawlerWorkflow)
 	env.RegisterActivity(chapter_crawler.ChapterParseActivity)
 	env.RegisterActivity(nopeWriterActivity())
+	env.RegisterActivity(BuildBookDocusaurusIndexActivity)
+	
+	env.
+		OnActivity(
+			activities.FileWritingActivity,
+			mock.Anything,
+			"build/static/VI1934/giu/_category_.json",
+			[]byte(`{"label":"Giu-đe ","position":65,"link":{"type":"generated-index"}}`),
+			mock.Anything,
+		).
+		Return(nil)
 	
 	// run it
 	env.ExecuteWorkflow(BookCrawlerWorkflow, MockBookInfo(fixtures.BookInfo_VI_JudeJson))

@@ -4,10 +4,10 @@ import (
 	"go.temporal.io/sdk/worker"
 )
 
-func RegisterWorkflow(w worker.Worker, wd string) {
+func RegisterWorkflow(w worker.Worker) {
 	w.RegisterWorkflow(ChapterCrawlerWorkflow)
 	w.RegisterActivity(ChapterParseActivity)
 	
-	writer := NewResultWriter(nil, wd, true)
+	writer := NewResultWriter(nil, true)
 	w.RegisterActivity(writer.WriteResultActivity)
 }

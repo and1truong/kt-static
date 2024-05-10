@@ -28,8 +28,7 @@ func BookCrawlerWorkflow(ctx workflow.Context, bookInfo entity.BookInfo) (int, e
 			return 0, err
 		}
 		
-		// TODO: parse book
-		// func BookListParse(ctx context.Context, tran string, body []byte) (*tc.TranslationInfo, error) {
+		// parse book
 		tranInfo, err := chapter_crawler.BookListParse(context.TODO(), bookInfo.Tran, body)
 		if err != nil {
 			return 0, err
@@ -74,6 +73,29 @@ func BookCrawlerWorkflow(ctx workflow.Context, bookInfo entity.BookInfo) (int, e
 		}
 		
 		counter = counter + val
+	}
+	
+	// ============================
+	// build book index file: _category_.json
+	// schema is like:
+	//  {
+	//      "label": "1 Cô-rinh-tô",
+	//      "position": 1,
+	//      "link": { "type": "generated-index" }
+	// }
+	// ============================
+	var docusaurusIndex []byte
+	var err error
+	err = workflow.ExecuteActivity(ctx, BuildBookDocusaurusIndexActivity, bookInfo).Get(ctx, &docusaurusIndex)
+	if err != nil {
+		return 0, err
+	}
+	
+	// write the file
+	writePath := fmt.Sprintf("build/static/%s/%s/_category_.json", bookInfo.Tran, bookInfo.BookCode)
+	err = workflow.ExecuteActivity(ctx, activities.FileWritingActivity, writePath, docusaurusIndex, 0644).Get(ctx, nil)
+	if err != nil {
+		return 0, nil
 	}
 	
 	return counter, nil

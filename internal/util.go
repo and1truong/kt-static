@@ -2,12 +2,16 @@ package internal
 
 import (
 	"context"
+	"encoding/json"
 	"log"
+	"os"
 	
 	"github.com/pkg/errors"
 	"go.temporal.io/sdk/client"
 	"temporal-crawler/internal/resources"
 )
+
+type FileWriter func(name string, data []byte, perm os.FileMode) error
 
 func TemporalClient() client.Client {
 	c, err := client.Dial(client.Options{})
@@ -42,4 +46,10 @@ func ExecuteTemporalWorkflow[T any, R any](ctx context.Context, wf T, resul *R, 
 	log.Println("Completed workflow", "WorkflowID", process.GetID(), "RunID", process.GetRunID(), "Result", result)
 	
 	return nil
+}
+
+func JsonifyStringSlice(slice []string) string {
+	out, _ := json.Marshal(slice)
+	
+	return string(out)
 }

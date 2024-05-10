@@ -10,6 +10,8 @@ import (
 	"text/template"
 	
 	"go.temporal.io/sdk/activity"
+	"temporal-crawler/internal"
+	"temporal-crawler/internal/activities"
 	"temporal-crawler/internal/entity"
 	"temporal-crawler/internal/resources"
 	"temporal-crawler/internal/resources/translation"
@@ -23,30 +25,27 @@ type (
 		LanguageName    translation.LANG
 		Slug            string
 		Content         string
+		AudioFiles      string
 	}
 )
 
-type writer func(name string, data []byte, perm os.FileMode) error
-
-func NewResultWriter(writer writer, dir string, createMissingDir bool) *ResultWriter {
+func NewResultWriter(writer internal.FileWriter, createMissingDir bool) *ResultWriter {
 	if writer == nil {
 		writer = os.WriteFile
 	}
 	
 	return &ResultWriter{
-		baseDir:          dir,
 		createMissingDir: createMissingDir,
 		writer:           writer,
 	}
 }
 
 type ResultWriter struct {
-	baseDir          string
 	createMissingDir bool
-	writer           writer
+	writer           internal.FileWriter
 }
 
-func (w *ResultWriter) getWriter() writer {
+func (w *ResultWriter) getWriter() internal.FileWriter {
 	if w.writer != nil {
 		return w.writer
 	}
@@ -70,6 +69,7 @@ func (w *ResultWriter) WriteResultActivity(ctx context.Context, book entity.Book
 		LanguageName:    translation.Translations[book.Tran],
 		Slug:            fmt.Sprintf("/%s/%d/%s", book.BookCode, chapter.Number, book.Tran),
 		Content:         chapter.String(),
+		AudioFiles:      internal.JsonifyStringSlice(chapter.AudioLinks),
 	}
 	
 	buf := bytes.NewBufferString("")
@@ -79,7 +79,7 @@ func (w *ResultWriter) WriteResultActivity(ctx context.Context, book entity.Book
 		return err
 	}
 	
-	writePath, err := w.getWritingPath("%s/build/static/%s/%s/%d.md", w.baseDir, book.Tran, book.BookCode, chapter.Number)
+	writePath, err := w.getWritingPath("%s/build/static/%s/%s/%d.md", activities.GetBaseDir(), book.Tran, book.BookCode, chapter.Number)
 	if err != nil {
 		logger.Error("failed to get writing path", "error", err)
 		return err

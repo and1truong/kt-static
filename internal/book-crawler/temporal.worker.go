@@ -6,4 +6,5 @@ import (
 
 func RegisterWorkflow(w worker.Worker) {
 	w.RegisterWorkflow(BookCrawlerWorkflow)
+	w.RegisterActivity(BuildBookDocusaurusIndexActivity)
 }

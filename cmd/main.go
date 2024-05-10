@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/cobra"
 	"go.temporal.io/sdk/client"
 	"go.temporal.io/sdk/worker"
+	"temporal-crawler/internal/activities"
 	"temporal-crawler/internal/book-crawler"
 	chapter_crawler "temporal-crawler/internal/chapter-crawler"
 	translation_crawler "temporal-crawler/internal/translation-crawler"
@@ -37,11 +38,13 @@ var TemporalWorkerCommand = &cobra.Command{
 		defer c.Close()
 		
 		wd, _ := os.Getwd()
-		w := worker.New(c, "kt-crawling", worker.Options{})
+		activities.SetBaseDir(wd)
 		
+		w := worker.New(c, "kt-crawling", worker.Options{})
 		translation_crawler.RegisterWorkflow(w)
 		book_crawler.RegisterWorkflow(w)
-		chapter_crawler.RegisterWorkflow(w, wd)
+		chapter_crawler.RegisterWorkflow(w)
+		activities.RegisterActivities(w)
 		
 		// log.Println("Started Workflow Execution", "WorkflowID", w.GetID(), "RunID", w.GetRunID())
 		if err := w.Run(worker.InterruptCh()); err != nil {
