@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.temporal.io/sdk/testsuite"
 	"temporal-crawler/internal/activities"
+	"temporal-crawler/internal/chapter-crawler"
 	"temporal-crawler/internal/entity"
 )
 
@@ -32,7 +33,8 @@ func TestWorkflowWithCodeName(t *testing.T) {
 		env.SetTestTimeout(10 * time.Minute)
 		env.SetDetachedChildWait(true)
 		env.SetTestTimeout(10 * time.Minute)
-		env.RegisterActivity(BookParseActivity)
+		env.RegisterWorkflow(chapter_crawler.ChapterCrawlerWorkflow)
+		env.RegisterActivity(chapter_crawler.ChapterParseActivity)
 		env.RegisterActivity(activities.FetchActivity)
 		env.RegisterActivity(nopeWriterActivity())
 		

@@ -9,6 +9,7 @@ import (
 	"go.temporal.io/sdk/client"
 	"go.temporal.io/sdk/worker"
 	"temporal-crawler/internal/book-crawler"
+	chapter_crawler "temporal-crawler/internal/chapter-crawler"
 	translation_crawler "temporal-crawler/internal/translation-crawler"
 )
 
@@ -39,7 +40,8 @@ var TemporalWorkerCommand = &cobra.Command{
 		w := worker.New(c, "kt-crawling", worker.Options{})
 		
 		translation_crawler.RegisterWorkflow(w)
-		book_crawler.RegisterWorkflow(w, wd)
+		book_crawler.RegisterWorkflow(w)
+		chapter_crawler.RegisterWorkflow(w, wd)
 		
 		// log.Println("Started Workflow Execution", "WorkflowID", w.GetID(), "RunID", w.GetRunID())
 		if err := w.Run(worker.InterruptCh()); err != nil {
@@ -51,8 +53,8 @@ var TemporalWorkerCommand = &cobra.Command{
 func main() {
 	rootCmd.AddCommand(TemporalWorkerCommand)
 	
-	startCmd.AddCommand(book_crawler.TriggerCommand)
 	startCmd.AddCommand(translation_crawler.TriggerCommand)
+	startCmd.AddCommand(book_crawler.TriggerCommand)
 	rootCmd.AddCommand(startCmd)
 	
 	if err := rootCmd.Execute(); err != nil {

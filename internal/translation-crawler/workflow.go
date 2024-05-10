@@ -12,7 +12,7 @@ import (
 
 func TranslationCrawlerWorkflow(ctx workflow.Context, tran string) (map[int]int, error) {
 	ctx = workflow.WithActivityOptions(ctx, workflow.ActivityOptions{
-		StartToCloseTimeout: 2 * time.Minute,
+		StartToCloseTimeout: 20 * time.Minute,
 	})
 	
 	// ============================

@@ -7,7 +7,6 @@ import (
 	"github.com/spf13/cobra"
 	"temporal-crawler/internal"
 	"temporal-crawler/internal/entity"
-	"temporal-crawler/internal/resources/fixtures"
 )
 
 func MockBookInfo(content []byte) entity.BookInfo {
@@ -26,8 +25,10 @@ func MockBookInfo(content []byte) entity.BookInfo {
 }
 
 var TriggerCommand = &cobra.Command{
-	Use:   "book",
-	Short: "Start crawling a book",
+	Use:     "book",
+	Short:   "Start crawling a book",
+	Example: "kt-crawler start book VI1934 kh",
+	Args:    cobra.ExactArgs(2),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var result int
 		
@@ -35,7 +36,10 @@ var TriggerCommand = &cobra.Command{
 			cmd.Context(),
 			BookCrawlerWorkflow,
 			&result,
-			MockBookInfo(fixtures.BookInfo_VI_NahumJson),
+			entity.BookInfo{
+				Tran:     args[0],
+				BookCode: args[1],
+			},
 		)
 	},
 }

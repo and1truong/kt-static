@@ -3,7 +3,7 @@ package translation_crawler
 import (
 	"context"
 	
-	book_crawler "temporal-crawler/internal/book-crawler"
+	book_crawler "temporal-crawler/internal/chapter-crawler"
 	"temporal-crawler/internal/entity"
 )
 

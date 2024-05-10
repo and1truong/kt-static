@@ -1,4 +1,4 @@
-package book_crawler
+package chapter_crawler
 
 import (
 	"encoding/json"

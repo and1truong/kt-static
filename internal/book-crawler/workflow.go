@@ -2,27 +2,19 @@ package book_crawler
 
 import (
 	"context"
+	"fmt"
 	"time"
 	
-	"github.com/pkg/errors"
 	"go.temporal.io/sdk/workflow"
 	"temporal-crawler/internal/activities"
+	chapter_crawler "temporal-crawler/internal/chapter-crawler"
 	"temporal-crawler/internal/entity"
-	"temporal-crawler/internal/resources/translation"
-)
-
-var (
-	baseUrl = "https://kinhthanh.httlvn.org"
 )
 
 func BookCrawlerWorkflow(ctx workflow.Context, bookInfo entity.BookInfo) (int, error) {
 	ctx = workflow.WithActivityOptions(ctx, workflow.ActivityOptions{
-		StartToCloseTimeout: 2 * time.Minute,
+		StartToCloseTimeout: 20 * time.Minute,
 	})
-	
-	var fetchFutures []workflow.Future
-	var parseFutures []workflow.Future
-	var writeFutures []workflow.Future
 	
 	// if full bookInfo is not provided, we should rebuild them
 	if len(bookInfo.Chapters) == 0 {
@@ -38,7 +30,7 @@ func BookCrawlerWorkflow(ctx workflow.Context, bookInfo entity.BookInfo) (int, e
 		
 		// TODO: parse book
 		// func BookListParse(ctx context.Context, tran string, body []byte) (*tc.TranslationInfo, error) {
-		tranInfo, err := BookListParse(context.TODO(), bookInfo.Tran, body)
+		tranInfo, err := chapter_crawler.BookListParse(context.TODO(), bookInfo.Tran, body)
 		if err != nil {
 			return 0, err
 		}
@@ -55,52 +47,34 @@ func BookCrawlerWorkflow(ctx workflow.Context, bookInfo entity.BookInfo) (int, e
 	}
 	
 	// ============================
-	// trigger fetch activities
+	// trigger chapter crawling workflow
 	// ============================
-	for _, chapPath := range bookInfo.Chapters {
-		ft := workflow.ExecuteActivity(ctx, activities.FetchActivity, baseUrl+chapPath)
-		fetchFutures = append(fetchFutures, ft)
+	var results []workflow.ChildWorkflowFuture
+	for i, chapPath := range bookInfo.Chapters {
+		childCtx := workflow.WithChildOptions(ctx, workflow.ChildWorkflowOptions{
+			WorkflowID: fmt.Sprintf(
+				"%s/%d",
+				workflow.GetInfo(ctx).WorkflowExecution.ID,
+				i+1,
+			),
+		})
+		
+		child := workflow.ExecuteChildWorkflow(childCtx, chapter_crawler.ChapterCrawlerWorkflow, bookInfo, chapPath)
+		results = append(results, child)
 	}
 	
 	// ============================
-	// wait for fetching-activities to be completed
-	// and trigger parsing activities
+	// Waits for all child workflows to complete
 	// ============================
-	for _, ft := range fetchFutures {
-		var body []byte
-		err := ft.Get(ctx, &body)
-		if err != nil {
-			return 0, errors.Wrap(err, "failed to get fetch result")
+	counter := 0
+	for _, result := range results {
+		val := 0
+		if err := result.Get(ctx, &val); err != nil {
+			return 0, err
 		}
 		
-		// trigger BookParseActivity
-		ft := workflow.ExecuteActivity(ctx, BookParseActivity, translation.Translations[bookInfo.Tran], body)
-		parseFutures = append(parseFutures, ft)
+		counter = counter + val
 	}
 	
-	// ============================
-	// wait for parsing-activities to be completed
-	// and trigger writing activities
-	// ============================
-	writer := ResultWriter{}
-	for _, ft := range parseFutures {
-		var chapter entity.ChapterInfo
-		err := ft.Get(ctx, &chapter)
-		if err != nil {
-			return 0, errors.Wrap(err, "failed to get chapter result")
-		}
-		
-		ft := workflow.ExecuteActivity(ctx, writer.WriteResultActivity, bookInfo, chapter)
-		writeFutures = append(writeFutures, ft)
-	}
-	
-	// wait for writing-activities to be completed
-	for _, ft := range writeFutures {
-		err := ft.Get(ctx, nil)
-		if err != nil {
-			return 0, errors.Wrap(err, "failed to get result from writing activity")
-		}
-	}
-	
-	return len(fetchFutures), nil
+	return counter, nil
 }

@@ -1,4 +1,4 @@
-package book_crawler
+package chapter_crawler
 
 import (
 	"bytes"
@@ -28,14 +28,14 @@ type (
 
 type writer func(name string, data []byte, perm os.FileMode) error
 
-func NewResultWriter(writer writer, dir string) *ResultWriter {
+func NewResultWriter(writer writer, dir string, createMissingDir bool) *ResultWriter {
 	if writer == nil {
 		writer = os.WriteFile
 	}
 	
 	return &ResultWriter{
 		baseDir:          dir,
-		createMissingDir: true,
+		createMissingDir: createMissingDir,
 		writer:           writer,
 	}
 }

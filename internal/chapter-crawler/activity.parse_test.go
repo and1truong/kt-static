@@ -1,4 +1,4 @@
-package book_crawler
+package chapter_crawler
 
 import (
 	"context"
@@ -49,7 +49,7 @@ func TestParseActivity(t *testing.T) {
 	}
 	
 	for _, item := range items {
-		chap, err := BookParseActivity(context.Background(), item.lang, item.mockHtml)
+		chap, err := ChapterParseActivity(context.Background(), item.lang, item.mockHtml)
 		require.NoError(t, err)
 		require.Len(t, chap.AudioLinks, item.audio)
 		require.Greater(t, len(chap.Blocks), item.blocks)

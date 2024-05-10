@@ -1,4 +1,4 @@
-package book_crawler
+package chapter_crawler
 
 import (
 	"bytes"
@@ -12,7 +12,7 @@ import (
 	"temporal-crawler/internal/resources/translation"
 )
 
-func BookParseActivity(ctx context.Context, lang translation.LANG, body []byte) (*entity.ChapterInfo, error) {
+func ChapterParseActivity(ctx context.Context, lang translation.LANG, body []byte) (*entity.ChapterInfo, error) {
 	bodyReader := bytes.NewReader(body)
 	doc, err := goquery.NewDocumentFromReader(bodyReader)
 	if err != nil {
