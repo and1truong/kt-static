@@ -105,8 +105,8 @@ const config: Config = {
           title: 'More',
           items: [
             {
-              label: 'Facebook',
-              href: 'https://www.facebook.com/phucamtv',
+              label: 'PhucAm.tv',
+              href: 'https://phucam.tv',
             },
           ],
         },
