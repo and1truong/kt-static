@@ -85,7 +85,7 @@ const config: Config = {
           ],
         },
         {
-          title: 'Community',
+          title: 'Cộng Đồng',
           items: [
             {
               label: 'Facebook',
@@ -102,7 +102,7 @@ const config: Config = {
           ],
         },
         {
-          title: 'More',
+          title: 'Nội mạng',
           items: [
             {
               label: 'PhucAm.tv',

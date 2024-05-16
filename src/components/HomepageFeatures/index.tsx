@@ -10,33 +10,33 @@ type FeatureItem = {
 
 const FeatureList: FeatureItem[] = [
   {
-    title: 'Guide from The LORD',
+    title: 'Sự mặc khải từ thiên thượng',
     Svg: require('@site/static/img/undraw_docusaurus_mountain.svg').default,
     description: (
       <>
-        The Bible is the lamp unto our feet and the light unto our path.
-        It means that it serves as our guide throughout life -- gives us principles
-        to follow to help us in our decision-making.
+        Kinh Thánh là ngọn đèn cho chân chúng ta và là ánh sáng cho đường đi của chúng ta.
+        Lời của Thiên Chúa dẫn dắt chúng ta trong suốt cuộc đời -- 
+        cung cấp cho chúng ta các nguyên tắc để tuân theo để giúp chúng ta trong việc ra quyết định.
       </>
     ),
   },
   {
-    title: 'Through THIS we get faith',
+    title: 'Nguyên liệu dưỡng linh quan trọng nhất',
     Svg: require('@site/static/img/undraw_docusaurus_tree.svg').default,
     description: (
       <>
-        One of the most significant benefits of reading the Bible is that
-        it helps us build our faith. The Bible is the ultimate source of knowledge and wisdom.
+        Kinh Thánh là nguồn kiến thức và sự khôn ngoan tối thượng.
+        Học hỏi kinh văn mỗi ngày góp phần xây dựng đức tin của mình nơi Thiên Chúa.
       </>
     ),
   },
   {
-    title: 'Makes one awesomely abundant',
+    title: 'Nguồn ơn phước vô tận',
     Svg: require('@site/static/img/undraw_docusaurus_react.svg').default,
     description: (
       <>
-        Reading the Bible is the best investment in life.
-        If we keep everything written in the law, we will succeed and prosper.
+        Đọc Kinh Thánh là khoản đầu tư tốt nhất trong cuộc sống.
+        Nếu chúng ta giữ mọi điều đã viết trong luật pháp, chúng ta sẽ thành công và thịnh vượng.
       </>
     ),
   },
