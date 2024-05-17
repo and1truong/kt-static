@@ -28,11 +28,6 @@ const config: Config = {
         defaultLocale: "vi",
         locales: ["vi"],
     },
-    
-    customFields: {
-        audiosFiles: "WIP",
-    },
-    
     presets: [
         [
             "classic", {

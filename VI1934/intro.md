@@ -1,6 +1,6 @@
 ---
 slug: /
-title: "Bản Dịch Thánh Kinh 1934"
+title: "Giới Thiệu"
 sidebar_position: -1
 ---
 
