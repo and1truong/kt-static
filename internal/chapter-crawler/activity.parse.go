@@ -93,7 +93,7 @@ func parseTitle(selection *goquery.Selection, attrClass string) (entity.Block, i
 	selection.FindMatcher(goquery.Single("h3")).Each(
 		func(i int, sub *goquery.Selection) {
 			block.Content = append(block.Content, entity.InnerBlock{
-				Content:    sub.Text(),
+				Content:    cleanUpString(sub.Text()),
 				References: nil,
 			})
 		},
@@ -139,6 +139,10 @@ func cleanupInnerText(selection *goquery.Selection) (string, string, bool) {
 		txt = strings.TrimSuffix(txt, "<br/>")
 	}
 	
+	return num, cleanUpString(txt), newLine
+}
+
+func cleanUpString(txt string) string {
 	txt = strings.Trim(txt, "  ")
 	txt = strings.Replace(txt, " ", " ", -1)
 	txt = strings.Replace(txt, " ", " ", -1)
@@ -146,7 +150,7 @@ func cleanupInnerText(selection *goquery.Selection) (string, string, bool) {
 	txt = strings.Replace(txt, "Christ", "Cơ-đốc", -1)
 	txt = strings.Replace(txt, "nầy", "này", -1)
 	
-	return num, txt, newLine
+	return txt
 }
 
 func parseInnerBlocks(txt string) []entity.InnerBlock {
