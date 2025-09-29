@@ -8,6 +8,8 @@ import BrowserOnly from "@docusaurus/BrowserOnly";
 type Props = WrapperProps<typeof MDXContentType>;
 
 export default function MDXContentWrapper(props: Props): ReactNode {
+    const {id,title } =  props.children["type"].metadata
+
     return (
         <>
             <MDXContent {...props} />
@@ -18,8 +20,8 @@ export default function MDXContentWrapper(props: Props): ReactNode {
                         shortname='https-thanhkinh-vercel-app'
                         config={
                             {
-                                identifier: props.children["_owner"]["memoizedProps"].route.path,
-                                title: props.children["type"].contentTitle,
+                                identifier: id,
+                                title: title,
                                 language: 'vi',
                             }
                         }
