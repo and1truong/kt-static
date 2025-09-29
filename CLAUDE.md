@@ -86,13 +86,17 @@ VI1934/
 ## Development Notes
 
 ### Node.js Version
+
 - Requires Node.js 22.x (specified in package.json engines)
 
 ### TypeScript
+
 - Type checking available with `npm run typecheck`
 - Full TypeScript support with Docusaurus type definitions
 
 ### Customization
+
 - Theme customization through `src/css/custom.css`
 - Component customization available via `npm run swizzle`
 - Navigation and footer links configured in `docusaurus.config.ts`
+- 

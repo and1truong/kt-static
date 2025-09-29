@@ -1,3 +1,6 @@
+@import "tailwindcss";
+@import "@radix-ui/themes/styles.css";
+
 /**
  * Any CSS included here will be global. The classic template
  * bundles Infima by default. Infima is a CSS framework designed to
@@ -6,25 +9,40 @@
 
 /* You can override the default Infima variables here. */
 :root {
-  --ifm-color-primary: #114954;
-  --ifm-color-primary-dark: #0f424c;
-  --ifm-color-primary-darker: #0e3e47;
-  --ifm-color-primary-darkest: #0c333b;
-  --ifm-color-primary-light: #13505c;
-  --ifm-color-primary-lighter: #145461;
-  --ifm-color-primary-lightest: #165f6d;
-  --ifm-code-font-size: 95%;
-  /*--docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);*/
+    --ifm-color-primary: #114954;
+    --ifm-color-primary-dark: #0f424c;
+    --ifm-color-primary-darker: #0e3e47;
+    --ifm-color-primary-darkest: #0c333b;
+    --ifm-color-primary-light: #13505c;
+    --ifm-color-primary-lighter: #145461;
+    --ifm-color-primary-lightest: #165f6d;
+    --ifm-code-font-size: 95%;
+    /*--docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);*/
 }
 
 /* For readability concerns, you should choose a lighter palette in dark mode. */
-[data-theme='dark'] {
-  --ifm-color-primary: #d2fa27;
-  --ifm-color-primary-dark: #ccf90b;
-  --ifm-color-primary-darker: #c4f006;
-  --ifm-color-primary-darkest: #a1c605;
-  --ifm-color-primary-light: #d8fb43;
-  --ifm-color-primary-lighter: #dbfb51;
-  --ifm-color-primary-lightest: #e4fc7c;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+[data-theme="dark"] {
+    --ifm-color-primary: #d2fa27;
+    --ifm-color-primary-dark: #ccf90b;
+    --ifm-color-primary-darker: #c4f006;
+    --ifm-color-primary-darkest: #a1c605;
+    --ifm-color-primary-light: #d8fb43;
+    --ifm-color-primary-lighter: #dbfb51;
+    --ifm-color-primary-lightest: #e4fc7c;
+    --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+}
+
+.audio-toggle {
+    float: right;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: small;
+    opacity: 1;
+
+    @apply my-7;
+}
+
+li.footer__item a svg {
+    display: inline;
 }
