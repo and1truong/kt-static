@@ -3,33 +3,29 @@ import MDXContent from '@theme-original/MDXContent';
 import type MDXContentType from '@theme/MDXContent';
 import type {WrapperProps} from '@docusaurus/types';
 import {DiscussionEmbed} from 'disqus-react';
+import BrowserOnly from "@docusaurus/BrowserOnly";
 
 type Props = WrapperProps<typeof MDXContentType>;
 
 export default function MDXContentWrapper(props: Props): ReactNode {
-    const identifier = props.children["_owner"]["memoizedProps"].route.path
-    const pageTitle = props.children["type"].contentTitle
-
-    console.log({ identifier, pageTitle })
-
     return (
         <>
             <MDXContent {...props} />
-
-            {
-                identifier && <>
-                    <DiscussionEmbed
+            
+            <BrowserOnly fallback={<div/>}>
+                {
+                    () => <DiscussionEmbed
                         shortname='https-thanhkinh-vercel-app'
                         config={
                             {
-                                identifier,
-                                title: pageTitle,
+                                identifier: props.children["_owner"]["memoizedProps"].route.path,
+                                title: props.children["type"].contentTitle,
                                 language: 'vi',
                             }
                         }
                     />
-                </>
-            }
+                }
+            </BrowserOnly>
         </>
     );
 }
