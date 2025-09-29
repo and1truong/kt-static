@@ -1,26 +1,36 @@
 import React from "react";
 import { useAudio } from "../../contexts/AudioContext";
+import { Callout } from "@radix-ui/themes";
+import { InfoCircledIcon } from "@radix-ui/react-icons";
 
 const AudioPlayer = () => {
-    const { audioPaths } = useAudio();
+  const { audioPaths } = useAudio();
 
-    if (!audioPaths) {
-        return <></>
-    }
+  if (!audioPaths) {
+    return <></>;
+  }
 
-    return (
-        <div>
-            {
-                audioPaths.map( (path, index ) => <>
-                    <div key={index}>
-                        <audio controls src={`https://kinhthanh.httlvn.org//${ path }`}>
-                            Your browser does not support the audio element.
-                        </audio>
-                    </div>
-                </>)
-            }
-        </div>
-    );
+  return (
+    <div>
+      <Callout.Root>
+        <Callout.Text>
+          {audioPaths.map((path, index) => (
+            <>
+              <div key={index} className={"pb-4 w-full"}>
+                <audio
+                  controls
+                  src={`https://kinhthanh.httlvn.org//${path}`}
+                  className="w-2xl"
+                >
+                  Your browser does not support the audio element.
+                </audio>
+              </div>
+            </>
+          ))}
+        </Callout.Text>
+      </Callout.Root>
+    </div>
+  );
 };
 
 export default AudioPlayer;
