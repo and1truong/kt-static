@@ -17,11 +17,7 @@ const AudioPlayer = () => {
           {audioPaths.map((path, index) => (
             <>
               <div key={index} className={"pb-4 w-full"}>
-                <audio
-                  controls
-                  src={`https://kinhthanh.httlvn.org//${path}`}
-                  className="w-2xl"
-                >
+                <audio controls src={`https://kinhthanh.httlvn.org//${path}`}>
                   Your browser does not support the audio element.
                 </audio>
               </div>
