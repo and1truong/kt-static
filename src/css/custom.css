@@ -1,3 +1,5 @@
+@import "tailwindcss";
+
 /**
  * Any CSS included here will be global. The classic template
  * bundles Infima by default. Infima is a CSS framework designed to
@@ -27,4 +29,16 @@
   --ifm-color-primary-lighter: #dbfb51;
   --ifm-color-primary-lightest: #e4fc7c;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+}
+
+.audio-toggle {
+  float: right;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: inherit;
+  opacity: 1;
+
+  -webkit-transform: scaleX(-1);
+  transform: scaleX(-1);
 }

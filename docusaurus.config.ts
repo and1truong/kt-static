@@ -116,6 +116,9 @@ const config: Config = {
             darkTheme: prismThemes.oneDark,
         },
     } satisfies Preset.ThemeConfig,
+    plugins: [
+        "./src/plugins/tailwind-config.js",
+    ]
 };
 
 export default config;

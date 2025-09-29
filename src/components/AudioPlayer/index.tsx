@@ -1,15 +1,24 @@
 import React from "react";
+import { useAudio } from "../../contexts/AudioContext";
 
-const AudioPlayer = ({ path, x }) => {
+const AudioPlayer = () => {
+    const { audioPaths } = useAudio();
+
+    if (!audioPaths) {
+        return <></>
+    }
+
     return (
         <div>
-            <pre>
-                X: {JSON.stringify(x)}
-            </pre>
-            
-            <audio controls src={path}>
-                Your browser does not support the audio element.
-            </audio>
+            {
+                audioPaths.map( (path, index ) => <>
+                    <div key={index}>
+                        <audio controls src={`https://kinhthanh.httlvn.org//${ path }`}>
+                            Your browser does not support the audio element.
+                        </audio>
+                    </div>
+                </>)
+            }
         </div>
     );
 };
