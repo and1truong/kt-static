@@ -42,3 +42,7 @@
 
     @apply my-7;
 }
+
+li.footer__item a svg {
+    display: inline;
+}
