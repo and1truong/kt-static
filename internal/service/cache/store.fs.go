@@ -1,4 +1,4 @@
-package util
+package cache
 
 import (
 	"context"
@@ -11,8 +11,8 @@ import (
 
 // --- Persistent Store Interface and Implementation ---
 
-// CacheStore is an interface for persistent cache storage.
-type CacheStore interface {
+// Store is an interface for persistent cache storage.
+type Store interface {
 	// Read returns the raw data and the expiration time.
 	Read(ctx context.Context, key string) (data []byte, expiry time.Time, err error)
 	// Write stores the raw data and its expiration time.
@@ -27,7 +27,7 @@ type fileCacheEntry struct {
 
 const defaultCacheDir = "/tmp/cache/"
 
-// FileSystemStore implements CacheStore using the local file system.
+// FileSystemStore implements Store using the local file system.
 type FileSystemStore struct {
 	dir string
 }

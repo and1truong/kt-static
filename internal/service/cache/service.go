@@ -1,10 +1,25 @@
-package util
+package cache
 
 import (
 	"context"
 	"encoding/json"
 	"time"
 )
+
+var (
+	globalStore Store
+	storeSet    bool
+)
+
+// SetStore sets the global cache store for the application.
+// It can only be called once. Subsequent calls will panic.
+func SetStore(store Store) {
+	if storeSet {
+		panic("cache store is already set and cannot be set again")
+	}
+	globalStore = store
+	storeSet = true
+}
 
 // --- In-Memory Cache Implementation ---
 
@@ -13,7 +28,7 @@ import (
 type cacheConfig struct {
 	ttl     time.Duration
 	noCache bool
-	store   CacheStore // Field for persistent storage
+	store   Store // Field for persistent storage
 }
 
 type CacheOption func(*cacheConfig)
@@ -33,15 +48,15 @@ func WithNoCache() CacheOption {
 	}
 }
 
-// WithCacheStore sets a custom CacheStore for persistent storage.
-func WithCacheStore(store CacheStore) CacheOption {
+// WithCacheStore sets a custom Store for persistent storage.
+func WithCacheStore(store Store) CacheOption {
 	return func(c *cacheConfig) {
 		c.store = store
 	}
 }
 
 // Cache is a generic function to process and cache the result of a value-generating function.
-// It now relies solely on the configured CacheStore (which defaults to an in-memory singleton)
+// It now relies solely on the configured Store (which defaults to an in-memory singleton)
 // for all cache read and write operations.
 func Cache[T any](ctx context.Context, key string, generateValue func() (T, error), options ...CacheOption) (T, error) {
 	var zero T
@@ -51,12 +66,17 @@ func Cache[T any](ctx context.Context, key string, generateValue func() (T, erro
 		opt(&config)
 	}
 
-	// Ensure a CacheStore is always configured, defaulting to the in-memory singleton.
+	// Ensure a Store is always configured.
 	if config.store == nil {
-		config.store = DefaultInMemoryStore()
+		if globalStore != nil {
+			config.store = globalStore
+		} else {
+			// Fallback to the default in-memory store if no global store is set.
+			config.store = DefaultInMemoryStore()
+		}
 	}
 
-	// 1. Try to read from cache (via CacheStore)
+	// 1. Try to read from cache (via Store)
 	if !config.noCache {
 		data, expiry, err := config.store.Read(ctx, key)
 		if err != nil {
@@ -80,7 +100,7 @@ func Cache[T any](ctx context.Context, key string, generateValue func() (T, erro
 		return zero, err
 	}
 
-	// 3. Write to cache (via CacheStore)
+	// 3. Write to cache (via Store)
 	// Serialize value
 	data, err := json.Marshal(value)
 	if err == nil {

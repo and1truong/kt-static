@@ -1,4 +1,4 @@
-package util
+package cache
 
 import (
 	"context"
@@ -12,9 +12,9 @@ type inMemoryCacheEntry struct {
 	Data   []byte
 }
 
-// InMemoryStore implements CacheStore using an in-memory map.
+// InMemoryStore implements Store using an in-memory map.
 // This is primarily for testing or scenarios where persistence is not required
-// but the CacheStore interface needs to be satisfied.
+// but the Store interface needs to be satisfied.
 type InMemoryStore struct {
 	store map[string]inMemoryCacheEntry
 	mu    sync.RWMutex
@@ -54,13 +54,13 @@ func (m *InMemoryStore) Write(ctx context.Context, key string, data []byte, expi
 }
 
 var (
-	defaultInMemoryWriter     CacheStore
+	defaultInMemoryWriter     Store
 	defaultInMemoryWriterOnce sync.Once
 )
 
 // DefaultInMemoryStore returns a singleton instance of InMemoryStore.
 // This is used as the default persistent store when none is configured.
-func DefaultInMemoryStore() CacheStore {
+func DefaultInMemoryStore() Store {
 	defaultInMemoryWriterOnce.Do(func() {
 		defaultInMemoryWriter = NewInMemoryStore()
 	})
