@@ -59,7 +59,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to initialize cache store: %v", err)
 	}
-
+	
 	var (
 		translationListener = translation_scan.NewTranslationScanListener(dispatcher, config.Fetch, cacheStore)
 		bookListener        = book_scan.NewBookScanListener(dispatcher)

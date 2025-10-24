@@ -18,7 +18,7 @@ func TestCrawTranslation(t *testing.T) {
 	// Setup dependencies
 	logger := &logging.MockLogger{}
 	dispatcher := eventdispatcher.NewDispatcher(logger)
-	config := fetch.FetchConfig{
+	config := fetch.Config{
 		Timeout: "5s",
 		Cache:   false, // Disable cache for this test
 	}

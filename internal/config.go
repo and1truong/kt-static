@@ -6,7 +6,7 @@ import "htruong/kt-crawler/internal/services/fetch"
 func NewDefaultConfig() *Config {
 	return &Config{
 		InitialURL: "https://kinhthanh.httlvn.org/?v=VI1934",
-		Fetch: fetch.FetchConfig{
+		Fetch: fetch.Config{
 			Timeout:         "30s",
 			Cache:           true,
 			CacheDir:        ".cache",
@@ -25,9 +25,9 @@ func NewDefaultConfig() *Config {
 
 // Config holds the application configuration.
 type Config struct {
-	InitialURL string            `json:"initialURL"`
-	Listeners  ListenersConfig   `json:"listeners"`
-	Fetch      fetch.FetchConfig `json:"fetch"`
+	InitialURL string          `json:"initialURL"`
+	Listeners  ListenersConfig `json:"listeners"`
+	Fetch      fetch.Config    `json:"fetch"`
 }
 
 type (

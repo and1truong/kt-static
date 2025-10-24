@@ -3,13 +3,13 @@
   "fetch": {
     "timeout": "30s",
     "cache": true,
-    "cacheDir": ".cache",
+    "cacheDir": "/tmp/kt-crawler/cache",
     "cacheTtlSeconds": 86400
   },
   "listeners": {
     "store": {
       "filesystem": {
-        "directory": "/tmp/output/chapters"
+        "directory": "/tmp/kt-crawler/output/chapters"
       },
       "dry": true
     }

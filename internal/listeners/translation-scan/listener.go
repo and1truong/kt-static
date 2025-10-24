@@ -21,14 +21,14 @@ const TranslationScanEventName = "translation.scan"
 // TranslationScanEvent is the event dispatched when a translation needs to be scanned.
 type TranslationScanEvent struct {
 	*eventdispatcher.BaseEvent
-	URL string
+	RequestPath string
 }
 
 // NewTranslationScanEvent creates a new TranslationScanEvent.
-func NewTranslationScanEvent(url string) *TranslationScanEvent {
+func NewTranslationScanEvent(requestPath string) *TranslationScanEvent {
 	return &TranslationScanEvent{
-		BaseEvent: eventdispatcher.NewBaseEvent(TranslationScanEventName),
-		URL:       url,
+		BaseEvent:   eventdispatcher.NewBaseEvent(TranslationScanEventName),
+		RequestPath: requestPath,
 	}
 }
 
@@ -39,7 +39,7 @@ type TranslationScanListener struct {
 }
 
 // NewTranslationScanListener creates a new TranslationScanListener.
-func NewTranslationScanListener(dispatcher *eventdispatcher.Dispatcher, config fetch.FetchConfig, cacheStore cache.Store) *TranslationScanListener {
+func NewTranslationScanListener(dispatcher *eventdispatcher.Dispatcher, config fetch.Config, cacheStore cache.Store) *TranslationScanListener {
 	return &TranslationScanListener{
 		Dispatcher: dispatcher,
 		Fetcher:    fetch.NewFetcher(config, cacheStore),
@@ -70,7 +70,7 @@ func (l *TranslationScanListener) Handle(ctx context.Context, event eventdispatc
 	}
 
 	var (
-		requestURL = scanEvent.URL
+		requestURL = scanEvent.RequestPath
 		body       []byte
 		err        error
 	)
@@ -80,7 +80,7 @@ func (l *TranslationScanListener) Handle(ctx context.Context, event eventdispatc
 		return fmt.Errorf("invalid url: %w", err)
 	}
 
-	body, err = l.Fetcher.Fetch(ctx, requestURL, fetch.WithConfig(l.Fetcher.DefaultConfig()))
+	body, err = l.Fetcher.Fetch(ctx, requestURL, fetch.WithConfig(l.Fetcher.Config()))
 	if err != nil {
 		return err
 	}
@@ -171,7 +171,7 @@ func scanGroup(result *Result, box *goquery.Selection) bool {
 			},
 		)
 
-		// find book's machine name from chapter's URL
+		// find book's machine name from chapter's RequestPath
 		if len(book.Chapters) > 0 && len(book.Chapters[0]) > 0 {
 			// The format is like: /doc-kinh-thanh/sa/1?v=VI1934
 			// Book's machine name should be: sa

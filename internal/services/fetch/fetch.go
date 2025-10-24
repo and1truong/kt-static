@@ -11,8 +11,8 @@ import (
 	"htruong/kt-crawler/internal/services/cache"
 )
 
-// FetchConfig holds configuration for a fetch operation.
-type FetchConfig struct {
+// Config holds configuration for a fetch operation.
+type Config struct {
 	Timeout         string `json:"timeout"`
 	Cache           bool   `json:"cache"`
 	CacheDir        string `json:"cacheDir"`
@@ -21,45 +21,45 @@ type FetchConfig struct {
 
 // Fetcher is the service responsible for fetching content.
 type Fetcher struct {
-	defaultConfig FetchConfig
-	cacheStore    cache.Store
+	config Config
+	store  cache.Store
 }
 
 // NewFetcher creates a new Fetcher instance.
-func NewFetcher(defaultConfig FetchConfig, store cache.Store) *Fetcher {
+func NewFetcher(config Config, store cache.Store) *Fetcher {
 	return &Fetcher{
-		defaultConfig: defaultConfig,
-		cacheStore:    store,
+		config: config,
+		store:  store,
 	}
 }
 
-// DefaultConfig returns the configuration the Fetcher was initialized with.
-func (f *Fetcher) DefaultConfig() FetchConfig {
-	return f.defaultConfig
+// Config returns the configuration the Fetcher was initialized with.
+func (f *Fetcher) Config() Config {
+	return f.config
 }
 
 // --- Options Pattern ---
 
 type options struct {
-	config *FetchConfig
+	config *Config
 }
 
 // Option is a function that configures a Fetch operation.
 type Option func(*options)
 
-// WithConfig provides a custom FetchConfig for the operation.
-func WithConfig(cfg FetchConfig) Option {
+// WithConfig provides a custom Config for the operation.
+func WithConfig(cfg Config) Option {
 	return func(opts *options) {
 		opts.config = &cfg
 	}
 }
 
-// Fetch fetches content from a URL, optionally using a cache and a custom timeout.
+// Fetch fetches content from a requestPath, optionally using a cache and a custom timeout.
 //
 // Simple call: f.Fetch(ctx, path) uses the Fetcher's default timeout and no cache.
 // Configured call: f.Fetch(ctx, path, WithConfig(config)) uses the provided config.
 func (f *Fetcher) Fetch(ctx context.Context, path string, opts ...Option) ([]byte, error) {
-	config := f.defaultConfig
+	config := f.config
 	config.Cache = false // Default for simple call is no cache
 
 	fetchOpts := &options{}
@@ -73,12 +73,12 @@ func (f *Fetcher) Fetch(ctx context.Context, path string, opts ...Option) ([]byt
 
 	u, err := url.Parse(path)
 	if err != nil {
-		return nil, fmt.Errorf("invalid URL: %w", err)
+		return nil, fmt.Errorf("invalid requestPath: %w", err)
 	}
 	cacheKey := u.Host + u.Path
 
 	if config.Cache {
-		data, expiry, err := f.cacheStore.Read(ctx, cacheKey)
+		data, expiry, err := f.store.Read(ctx, cacheKey)
 		if err == nil && data != nil {
 			if expiry.IsZero() || expiry.After(time.Now()) {
 				return data, nil // Cache hit
@@ -118,7 +118,7 @@ func (f *Fetcher) Fetch(ctx context.Context, path string, opts ...Option) ([]byt
 			expiry = time.Now().Add(time.Duration(config.CacheTtlSeconds) * time.Second)
 		}
 		// Note: We ignore the error here as a failed cache write should not fail the fetch operation.
-		_ = f.cacheStore.Write(ctx, cacheKey, body, expiry)
+		_ = f.store.Write(ctx, cacheKey, body, expiry)
 	}
 
 	return body, nil

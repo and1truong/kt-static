@@ -40,7 +40,7 @@ type ChapterScanListener struct {
 }
 
 // NewChapterScanListener creates a new ChapterScanListener.
-func NewChapterScanListener(dispatcher *eventdispatcher.Dispatcher, config fetch.FetchConfig, cacheStore cache.Store) *ChapterScanListener {
+func NewChapterScanListener(dispatcher *eventdispatcher.Dispatcher, config fetch.Config, cacheStore cache.Store) *ChapterScanListener {
 	return &ChapterScanListener{
 		Dispatcher: dispatcher,
 		Fetcher:    fetch.NewFetcher(config, cacheStore),
@@ -63,7 +63,7 @@ func (l *ChapterScanListener) Handle(ctx context.Context, rawEvent eventdispatch
 	}
 
 	requestURL := fmt.Sprintf("%s%s", event.baseURL, event.requestPath)
-	body, err := l.Fetcher.Fetch(ctx, requestURL, fetch.WithConfig(l.Fetcher.DefaultConfig()))
+	body, err := l.Fetcher.Fetch(ctx, requestURL, fetch.WithConfig(l.Fetcher.Config()))
 	if err != nil {
 		return fmt.Errorf("could not fetch book indexing page: %w", err)
 	}
