@@ -126,7 +126,7 @@ func (m modal) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case viewTranslations:
 			return translationListUpdate(m, msg)
 		case viewBooks:
-			return m.updateBooks(msg)
+			return bookListUpdate(m, msg)
 		case viewChapters:
 			return chapterListUpdate(m, msg)
 		case viewChapterContent:
