@@ -180,6 +180,12 @@ func bookListUpdate(m modal, msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		}
 	case "enter":
 		return chapterListEnter(m), nil
+	case "esc":
+		m.state = viewTranslations
+		m.books = []bookInfo{}
+		m.bookCursor = 0
+		m.cursor = 0
+		return m, nil
 	}
 
 	return m, nil
