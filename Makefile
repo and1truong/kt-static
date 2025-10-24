@@ -4,6 +4,9 @@ pro:
 flash:
 	gemini --model gemini-flash-latest
 
+claude:
+	ANTHROPIC_MODEL="gpt-oss-20b" && claude
+
 go-test:
 	go test -race -v -timeout 12s ./...
 
