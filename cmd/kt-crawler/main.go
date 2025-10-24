@@ -2,8 +2,9 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
+	"htruong/kt-crawler/internal/commands"
+	read_command "htruong/kt-crawler/internal/commands/read-command"
 	"log"
 	"net/url"
 	"os"
@@ -16,21 +17,6 @@ import (
 	"htruong/kt-crawler/internal/services/eventdispatcher"
 	"htruong/kt-crawler/internal/services/logging"
 )
-
-func loadConfig(path string) (*internal.Config, error) {
-	data, err := os.ReadFile(path)
-	if err != nil {
-		return nil, err
-	}
-
-	// Start with default config, then unmarshal the file content over it.
-	config := internal.NewDefaultConfig()
-	if err := json.Unmarshal(data, config); err != nil {
-		return nil, err
-	}
-
-	return config, nil
-}
 
 func main() {
 	app := &cli.App{
@@ -49,6 +35,28 @@ func main() {
 				Name:   "scan",
 				Usage:  "Starts the crawling process",
 				Action: runScan,
+			},
+			{
+				Name:  "read",
+				Usage: "Reads the downloaded content",
+				Action: func(c *cli.Context) error {
+					configPath := c.String("config")
+
+					var (
+						config *internal.Config
+					)
+
+					if configPath != "" {
+						var err error
+						config, err = commands.LoadConfig(configPath)
+						if err != nil {
+							return cli.Exit(fmt.Sprintf("Failed to load config from %s: %v", configPath, err), 1)
+						}
+					} else {
+						config = internal.NewDefaultConfig()
+					}
+					return read_command.RunRead(c, config)
+				},
 			},
 		},
 	}
@@ -70,7 +78,7 @@ func runScan(c *cli.Context) error {
 
 	if configPath != "" {
 		var err error
-		config, err = loadConfig(configPath)
+		config, err = commands.LoadConfig(configPath)
 		if err != nil {
 			return cli.Exit(fmt.Sprintf("Failed to load config from %s: %v", configPath, err), 1)
 		}

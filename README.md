@@ -29,6 +29,7 @@ Use the provided `Makefile` targets for common operations:
 | Command | Description |
 | :--- | :--- |
 | `make go-run-scan` | Runs the crawler using `config.sample.json` with the `scan` subcommand. |
+| `make go-run-read` | Runs the crawler using `config.sample.json` with the `read` subcommand. |
 | `make go-run-help` | Displays the application's help message. |
 | `make go-test` | Runs all unit tests with race detection. |
 | `make go-lint` | Runs the linter (`golangci-lint`). |
