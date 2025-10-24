@@ -7,7 +7,7 @@ import (
 	"log"
 	"net/url"
 	"os"
-	
+
 	"htruong/kt-crawler/internal"
 	"htruong/kt-crawler/internal/listeners"
 	"htruong/kt-crawler/internal/services/cache"
@@ -61,7 +61,7 @@ func main() {
 
 	var (
 		translationListener = listeners.NewTranslationScanListener(dispatcher, config.Fetch)
-		bookListener        = listeners.NewBookScanListener(dispatcher)
+		bookListener        = listeners.NewBookScanListener(dispatcher, config.Listeners.Store, logger)
 		chapterListener     = listeners.NewChapterScanListener(dispatcher, config.Fetch)
 		storeListener       = listeners.NewStoreListener(config.Listeners.Store, logger)
 	)
