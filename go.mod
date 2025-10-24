@@ -4,7 +4,6 @@ go 1.25.0
 
 require (
 	github.com/PuerkitoBio/goquery v1.10.3
-	github.com/charmbracelet/bubbles v0.21.0
 	github.com/charmbracelet/bubbletea v1.3.10
 	github.com/charmbracelet/lipgloss v1.1.0
 	github.com/fogleman/ease v0.0.0-20170301025033-8da417bf1776
