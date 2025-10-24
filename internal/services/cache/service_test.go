@@ -10,6 +10,22 @@ import (
 	"time"
 )
 
+// mockStore is a simple implementation of the Store interface for testing.
+type mockStore struct {
+	readCount  int32
+	writeCount int32
+}
+
+func (m *mockStore) Read(ctx context.Context, key string) (data []byte, expiry time.Time, err error) {
+	atomic.AddInt32(&m.readCount, 1)
+	return nil, time.Time{}, nil // Always a miss for simplicity
+}
+
+func (m *mockStore) Write(ctx context.Context, key string, data []byte, expiry time.Time) error {
+	atomic.AddInt32(&m.writeCount, 1)
+	return nil
+}
+
 // setupFSCache is a helper to create a temporary directory and a FileSystemStore.
 func setupFSCache(t *testing.T) (*FileSystemStore, string) {
 	t.Helper()
@@ -17,7 +33,10 @@ func setupFSCache(t *testing.T) (*FileSystemStore, string) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	writer := NewFileSystemStore(tempDir)
+	writer, err := NewFileSystemStore(tempDir)
+	if err != nil {
+		t.Fatalf("Failed to create FileSystemStore: %v", err)
+	}
 	return writer, tempDir
 }
 
@@ -90,13 +109,19 @@ func TestCache_WithNoCache(t *testing.T) {
 	}
 
 	// 1. First call (miss)
-	Cache(ctx, key, generateValue)
+	_, err := Cache(ctx, key, generateValue)
+	if err != nil {
+		t.Fatalf("Cache failed on first call: %v", err)
+	}
 	if atomic.LoadInt32(&callCount) != 1 {
 		t.Fatal("Expected count 1")
 	}
 
 	// 2. Second call with WithNoCache (miss, re-generate)
-	Cache(ctx, key, generateValue, WithNoCache())
+	_, err = Cache(ctx, key, generateValue, WithNoCache())
+	if err != nil {
+		t.Fatalf("Cache failed on second call: %v", err)
+	}
 	if atomic.LoadInt32(&callCount) != 2 {
 		t.Fatal("Expected count 2")
 	}
@@ -123,13 +148,13 @@ func TestCache_PersistentCache(t *testing.T) {
 	}
 
 	// 1. First call (miss, generate, write to in-memory and persistent)
-	val, err := Cache(ctx, key, generateValue, WithCacheStore(writer))
+	val, err := Cache(ctx, key, generateValue, WithStore(writer))
 	if err != nil || val != "fs_value_1" || atomic.LoadInt32(&callCount) != 1 {
 		t.Fatalf("First call failed: val=%v, err=%v, count=%d", val, err, callCount)
 	}
 
 	// 3. Second call (persistent hit, should not re-generate)
-	val, err = Cache(ctx, key, generateValue, WithCacheStore(writer))
+	val, err = Cache(ctx, key, generateValue, WithStore(writer))
 	if err != nil || val != "fs_value_1" || atomic.LoadInt32(&callCount) != 1 {
 		t.Fatalf("Second call failed (should be persistent hit): val=%v, err=%v, count=%d", val, err, callCount)
 	}
@@ -150,7 +175,10 @@ func TestCache_PersistentCacheTTL(t *testing.T) {
 	}
 
 	// 1. First call with short TTL
-	Cache(ctx, key, generateValue, WithCacheStore(writer), WithTTL(10*time.Millisecond))
+	_, err := Cache(ctx, key, generateValue, WithStore(writer), WithTTL(10*time.Millisecond))
+	if err != nil {
+		t.Fatalf("Cache failed on first call: %v", err)
+	}
 	if atomic.LoadInt32(&callCount) != 1 {
 		t.Fatal("Expected count 1")
 	}
@@ -159,7 +187,7 @@ func TestCache_PersistentCacheTTL(t *testing.T) {
 	time.Sleep(20 * time.Millisecond)
 
 	// 4. Third call (in-memory miss, persistent miss due to expiration, re-generate)
-	val, err := Cache(ctx, key, generateValue, WithCacheStore(writer))
+	val, err := Cache(ctx, key, generateValue, WithStore(writer))
 	if err != nil || val != "fs_ttl_value_2" || atomic.LoadInt32(&callCount) != 2 {
 		t.Fatalf("Third call failed (should be miss): val=%v, err=%v, count=%d", val, err, callCount)
 	}
@@ -198,7 +226,10 @@ func TestFileSystemCacheWriter_CustomDir(t *testing.T) {
 	}
 	defer os.RemoveAll(tempDir)
 
-	writer := NewFileSystemStore(tempDir)
+	writer, err := NewFileSystemStore(tempDir)
+	if err != nil {
+		t.Fatalf("Failed to create FileSystemStore: %v", err)
+	}
 	key := "custom_dir_key"
 	data := []byte("test data")
 	expiry := time.Now().Add(time.Hour)
@@ -222,7 +253,57 @@ func TestFileSystemCacheWriter_CustomDir(t *testing.T) {
 	if string(readData) != string(data) {
 		t.Fatalf("Read data mismatch. Got %s, expected %s", readData, data)
 	}
-	if !readExpiry.Equal(expiry.Truncate(time.Second)) { // JSON unmarshal loses precision, so truncate for comparison
-		t.Logf("Warning: Expiry time precision lost. Expected %v, Got %v", expiry, readExpiry)
+	// JSON unmarshal loses nanosecond precision (retains microsecond precision).
+	// Truncate the expected time to microseconds for a valid comparison.
+	expectedExpiry := expiry.Truncate(time.Microsecond)
+	if !readExpiry.Equal(expectedExpiry) {
+		t.Fatalf("Read expiry time mismatch. Expected %v, Got %v", expectedExpiry, readExpiry)
 	}
+}
+
+// TestSetStore_SetOnceAndUsage tests that SetStore works, is used by Cache, and panics on second call.
+func TestSetStore_SetOnceAndUsage(t *testing.T) {
+	// 1. Test SetStore usage in Cache
+	mock := &mockStore{}
+
+	// Check if the store is already set by a previous test. If not, set it.
+	// This is necessary because SetStore modifies global state and panics on subsequent calls.
+	if !storeSet {
+		SetStore(mock)
+	} else {
+		t.Log("Global store already set by another test. Skipping SetStore call for usage test.")
+	}
+
+	ctx := context.Background()
+	key := "test_global_store"
+	callCount := int32(0)
+	generateValue := func() (string, error) {
+		atomic.AddInt32(&callCount, 1)
+		return "value", nil
+	}
+
+	// First call to Cache. Should use the global store (mock).
+	_, err := Cache(ctx, key, generateValue)
+	if err != nil {
+		t.Fatalf("Cache failed: %v", err)
+	}
+
+	// Check if the mock store was used for reading (it should be a miss, so read is called once)
+	if atomic.LoadInt32(&mock.readCount) != 1 {
+		t.Errorf("Expected mock store Read to be called 1 time, got %d", mock.readCount)
+	}
+	// Check if the mock store was used for writing
+	if atomic.LoadInt32(&mock.writeCount) != 1 {
+		t.Errorf("Expected mock store Write to be called 1 time, got %d", mock.writeCount)
+	}
+
+	// 2. Test SetStore panic on second call
+	defer func() {
+		if r := recover(); r == nil {
+			t.Error("Expected SetStore to panic on second call, but it did not")
+		}
+	}()
+
+	// Attempt to set the store again (should panic)
+	SetStore(&mockStore{})
 }

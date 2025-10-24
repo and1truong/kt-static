@@ -3,54 +3,39 @@ package cache
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"os"
 	"time"
 )
 
-var (
-	globalStore Store
-	storeSet    bool
-)
-
-// SetStore sets the global cache store for the application.
-// It can only be called once. Subsequent calls will panic.
-func SetStore(store Store) {
-	if storeSet {
-		panic("cache store is already set and cannot be set again")
-	}
-	globalStore = store
-	storeSet = true
-}
-
-// --- In-Memory Cache Implementation ---
-
 // --- Cache Options ---
 
-type cacheConfig struct {
+type config struct {
 	ttl     time.Duration
 	noCache bool
 	store   Store // Field for persistent storage
 }
 
-type CacheOption func(*cacheConfig)
+type Option func(*config)
 
 // WithTTL sets the time-to-live for the cached entry.
-func WithTTL(ttl time.Duration) CacheOption {
-	return func(c *cacheConfig) {
+func WithTTL(ttl time.Duration) Option {
+	return func(c *config) {
 		c.ttl = ttl
 	}
 }
 
 // WithNoCache forces the value-generating function to be called, bypassing the cache read.
 // The result will still be written to the cache unless the value-generating function returns an error.
-func WithNoCache() CacheOption {
-	return func(c *cacheConfig) {
+func WithNoCache() Option {
+	return func(c *config) {
 		c.noCache = true
 	}
 }
 
-// WithCacheStore sets a custom Store for persistent storage.
-func WithCacheStore(store Store) CacheOption {
-	return func(c *cacheConfig) {
+// WithStore sets a custom Store for persistent storage.
+func WithStore(store Store) Option {
+	return func(c *config) {
 		c.store = store
 	}
 }
@@ -58,10 +43,10 @@ func WithCacheStore(store Store) CacheOption {
 // Cache is a generic function to process and cache the result of a value-generating function.
 // It now relies solely on the configured Store (which defaults to an in-memory singleton)
 // for all cache read and write operations.
-func Cache[T any](ctx context.Context, key string, generateValue func() (T, error), options ...CacheOption) (T, error) {
+func Cache[T any](ctx context.Context, key string, generateValue func() (T, error), options ...Option) (T, error) {
 	var zero T
 
-	config := cacheConfig{}
+	config := config{}
 	for _, opt := range options {
 		opt(&config)
 	}
@@ -80,7 +65,7 @@ func Cache[T any](ctx context.Context, key string, generateValue func() (T, erro
 	if !config.noCache {
 		data, expiry, err := config.store.Read(ctx, key)
 		if err != nil {
-			// In a real app, log this error.
+			fmt.Fprintf(os.Stderr, "cache: failed to read from store for key %s: %v\n", key, err)
 		} else if data != nil {
 			// Found in cache
 			if expiry.IsZero() || expiry.After(time.Now()) {
@@ -111,7 +96,7 @@ func Cache[T any](ctx context.Context, key string, generateValue func() (T, erro
 
 		// Write to cache
 		if writeErr := config.store.Write(ctx, key, data, expiry); writeErr != nil {
-			// In a real app, log this error.
+			fmt.Fprintf(os.Stderr, "cache: failed to write to store for key %s: %v\n", key, writeErr)
 		}
 	}
 	// Handle serialization error (e.g., log it)

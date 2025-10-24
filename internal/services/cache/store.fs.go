@@ -11,14 +11,6 @@ import (
 
 // --- Persistent Store Interface and Implementation ---
 
-// Store is an interface for persistent cache storage.
-type Store interface {
-	// Read returns the raw data and the expiration time.
-	Read(ctx context.Context, key string) (data []byte, expiry time.Time, err error)
-	// Write stores the raw data and its expiration time.
-	Write(ctx context.Context, key string, data []byte, expiry time.Time) error
-}
-
 // fileCacheEntry is the structure stored in the file system cache.
 type fileCacheEntry struct {
 	Expiry time.Time `json:"expiry"`
@@ -34,16 +26,15 @@ type FileSystemStore struct {
 
 // NewFileSystemStore creates a new file system cache store.
 // If dir is empty, it defaults to /tmp/cache/.
-func NewFileSystemStore(dir string) *FileSystemStore {
+func NewFileSystemStore(dir string) (*FileSystemStore, error) {
 	if dir == "" {
 		dir = defaultCacheDir
 	}
 	// Ensure directory exists
 	if err := os.MkdirAll(dir, 0755); err != nil {
-		// Note: In a real application, this error should be logged or returned.
-		// For this utility, we proceed and let subsequent file operations fail if the directory is unusable.
+		return nil, fmt.Errorf("failed to create cache directory %s: %w", dir, err)
 	}
-	return &FileSystemStore{dir: dir}
+	return &FileSystemStore{dir: dir}, nil
 }
 
 func (f *FileSystemStore) Read(ctx context.Context, key string) (data []byte, expiry time.Time, err error) {

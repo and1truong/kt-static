@@ -1,25 +1,4 @@
 package internal
 
-import (
-	"context"
-	"io"
-	"net/http"
-)
-
-func Fetch(ctx context.Context, path string) ([]byte, error) {
-	client := http.DefaultClient
-
-	req, err := http.NewRequestWithContext(ctx, "GET", path, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	res, err := client.Do(req)
-	if err != nil {
-		return nil, err
-	} else {
-		defer res.Body.Close()
-	}
-
-	return io.ReadAll(res.Body)
-}
+// This file is now empty as Fetch has been moved to internal/services/fetch.
+// It can be used for other utility functions later.
