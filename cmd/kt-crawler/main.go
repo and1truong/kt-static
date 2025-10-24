@@ -3,10 +3,12 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"flag"
+	"fmt"
 	"log"
 	"net/url"
 	"os"
+
+	"github.com/urfave/cli/v2"
 
 	"htruong/kt-crawler/internal"
 	"htruong/kt-crawler/internal/listeners"
@@ -31,9 +33,33 @@ func loadConfig(path string) (*internal.Config, error) {
 }
 
 func main() {
-	var configPath string
-	flag.StringVar(&configPath, "config", "", "path to the JSON configuration file")
-	flag.Parse()
+	app := &cli.App{
+		Name:  "kt-crawler",
+		Usage: "A crawler for the kt website",
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:    "config",
+				Aliases: []string{"c"},
+				Usage:   "path to the JSON configuration file",
+				Value:   "config.sample.json",
+			},
+		},
+		Commands: []*cli.Command{
+			{
+				Name:   "scan",
+				Usage:  "Starts the crawling process",
+				Action: runScan,
+			},
+		},
+	}
+
+	if err := app.Run(os.Args); err != nil {
+		log.Fatal(err)
+	}
+}
+
+func runScan(c *cli.Context) error {
+	configPath := c.String("config")
 
 	var (
 		ctx        = context.Background()
@@ -46,7 +72,7 @@ func main() {
 		var err error
 		config, err = loadConfig(configPath)
 		if err != nil {
-			log.Fatalf("Failed to load config from %s: %v", configPath, err)
+			return cli.Exit(fmt.Sprintf("Failed to load config from %s: %v", configPath, err), 1)
 		}
 	} else {
 		config = internal.NewDefaultConfig()
@@ -55,7 +81,7 @@ func main() {
 	// Initialize Cache Store
 	store, err := cache.InitStore(config.Cache.Default.Store)
 	if err != nil {
-		log.Fatalf("Failed to initialize cache store: %v", err)
+		return cli.Exit(fmt.Sprintf("Failed to initialize cache store: %v", err), 1)
 	}
 	cache.SetStore(store)
 
@@ -80,18 +106,20 @@ func main() {
 	{
 		parsedURL, err := url.Parse(config.InitialURL)
 		if err != nil {
-			log.Fatalf("Invalid initial URL: %v", err)
+			return cli.Exit(fmt.Sprintf("Invalid initial URL: %v", err), 1)
 		}
 		translationCode := parsedURL.Query().Get("v")
 		if translationCode == "" {
-			log.Fatalf("Translation code (v) not found in the initial URL")
+			return cli.Exit("Translation code (v) not found in the initial URL", 1)
 		}
 
 		initialEvent := listeners.NewTranslationScanEvent(config.InitialURL, translationCode)
 		if err := dispatcher.Dispatch(ctx, initialEvent); err != nil {
-			log.Fatalf("Initial dispatch failed: %v", err)
+			return cli.Exit(fmt.Sprintf("Initial dispatch failed: %v", err), 1)
 		}
 	}
 
 	logger.Info("crawler finished successfully.")
+
+	return nil
 }
