@@ -193,6 +193,12 @@ func chapterListUpdate(m modal, msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		}
 	case "enter":
 		return chapterContentEnter(m), nil
+	case "esc":
+		m.state = viewBooks
+		m.chapters = nil
+		m.chapterLabels = nil
+		m.cursor = m.bookCursor
+		return m, nil
 	}
 	return m, nil
 }
