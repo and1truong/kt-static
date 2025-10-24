@@ -11,7 +11,7 @@ func RunRead(c *cli.Context, config *internal.Config) error {
 	baseDir := config.Listeners.Store.Filesystem.Directory
 
 	// 1. Select Translation
-	selectedTranslation, translationPath, err := selectTranslation(baseDir)
+	selectedTranslation, translationPath, err := screenSelectTranslation(baseDir)
 	if err != nil {
 		return err
 	}
@@ -20,7 +20,7 @@ func RunRead(c *cli.Context, config *internal.Config) error {
 	}
 
 	// 2. Select Book
-	selectedBook, bookPath, err := selectBook(translationPath, selectedTranslation)
+	selectedBook, bookPath, err := screenSelectBook(translationPath, selectedTranslation)
 	if err != nil {
 		return err
 	}
@@ -29,7 +29,7 @@ func RunRead(c *cli.Context, config *internal.Config) error {
 	}
 
 	// 3. List Chapters
-	return listChapters(bookPath, selectedBook.Label, selectedTranslation)
+	return screenSelectChapter(bookPath, selectedBook.Label, selectedTranslation)
 }
 
 // formatInColumns prints a list of labels in the specified number of columns.

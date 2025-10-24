@@ -8,8 +8,8 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-// selectTranslation lists available translations and prompts the user for a selection.
-func selectTranslation(baseDir string) (string, string, error) {
+// screenSelectTranslation lists available translations and prompts the user for a selection.
+func screenSelectTranslation(baseDir string) (string, string, error) {
 	translations, err := os.ReadDir(baseDir)
 	if err != nil {
 		if os.IsNotExist(err) {

@@ -11,8 +11,8 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-// listChapters lists available chapters for a given book.
-func listChapters(bookPath string, bookLabel string, translationLabel string) error {
+// screenSelectChapter lists available chapters for a given book.
+func screenSelectChapter(bookPath string, bookLabel string, translationLabel string) error {
 	chapters, err := os.ReadDir(bookPath)
 	if err != nil {
 		return cli.Exit(fmt.Sprintf("Failed to read book directory %s: %v", bookPath, err), 1)

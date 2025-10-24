@@ -25,8 +25,8 @@ type (
 	}
 )
 
-// selectBook lists available books for a given translation and prompts the user for a selection.
-func selectBook(translationPath string, selectedTranslation string) (*bookInfo, string, error) {
+// screenSelectBook lists available books for a given translation and prompts the user for a selection.
+func screenSelectBook(translationPath string, selectedTranslation string) (*bookInfo, string, error) {
 	books, err := os.ReadDir(translationPath)
 	if err != nil {
 		return nil, "", cli.Exit(fmt.Sprintf("Failed to read translation directory %s: %v", translationPath, err), 1)
