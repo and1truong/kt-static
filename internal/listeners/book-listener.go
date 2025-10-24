@@ -1,10 +1,9 @@
-package book_scan
+package listeners
 
 import (
 	"context"
 	"fmt"
 	"htruong/kt-crawler/internal"
-	chapter_listener "htruong/kt-crawler/internal/listeners/chapter-listener"
 	"htruong/kt-crawler/internal/services/eventdispatcher"
 )
 
@@ -12,16 +11,18 @@ const BookScanEventName = "book.scan"
 
 type BookScanEvent struct {
 	*eventdispatcher.BaseEvent
-	baseURL string
-	book    internal.Book
+	baseURL         string
+	book            internal.Book
+	translationCode string
 }
 
 // NewBookScanEvent creates a new BookScanEvent.
-func NewBookScanEvent(baseURL string, book internal.Book) *BookScanEvent {
+func NewBookScanEvent(baseURL string, book internal.Book, translationCode string) *BookScanEvent {
 	return &BookScanEvent{
-		BaseEvent: eventdispatcher.NewBaseEvent(BookScanEventName),
-		baseURL:   baseURL,
-		book:      book,
+		BaseEvent:       eventdispatcher.NewBaseEvent(BookScanEventName),
+		baseURL:         baseURL,
+		book:            book,
+		translationCode: translationCode,
 	}
 }
 
@@ -48,7 +49,7 @@ func (l *BookScanListener) Handle(ctx context.Context, rawEvent eventdispatcher.
 
 	// Dispatch a event for each chapter
 	for _, chapterPath := range event.book.Chapters {
-		crawlEvent := chapter_listener.NewChapterScanEvent(event.baseURL, event.book, chapterPath)
+		crawlEvent := NewChapterScanEvent(event.baseURL, event.book, chapterPath, event.translationCode)
 		if err := l.Dispatcher.Dispatch(ctx, crawlEvent); err != nil {
 			return fmt.Errorf("failed to dispatch chapter crawl event for %s: %w", chapterPath, err)
 		}

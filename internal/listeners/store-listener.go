@@ -1,4 +1,4 @@
-package store_listener
+package listeners
 
 import (
 	"context"
@@ -15,15 +15,17 @@ const StoreEventName = "chapter.parsed"
 // StoreEvent is dispatched after a chapter has been successfully parsed.
 type StoreEvent struct {
 	*eventdispatcher.BaseEvent
-	Book    internal.Book
-	Chapter internal.Chapter
+	Book            internal.Book
+	Chapter         internal.Chapter
+	TranslationCode string
 }
 
-func NewStoreEvent(book internal.Book, chapter internal.Chapter) *StoreEvent {
+func NewStoreEvent(book internal.Book, chapter internal.Chapter, translationCode string) *StoreEvent {
 	return &StoreEvent{
-		BaseEvent: eventdispatcher.NewBaseEvent(StoreEventName),
-		Book:      book,
-		Chapter:   chapter,
+		BaseEvent:       eventdispatcher.NewBaseEvent(StoreEventName),
+		Book:            book,
+		Chapter:         chapter,
+		TranslationCode: translationCode,
 	}
 }
 
@@ -47,9 +49,10 @@ func (l *StoreListener) Handle(ctx context.Context, rawEvent eventdispatcher.Eve
 		return fmt.Errorf("unexpected event type: %T", rawEvent)
 	}
 
-	// Construct the file path: [base_dir]/[book_code]/[chapter_number].txt
+	// Construct the file path: [base_dir]/[translation_code]/[book_code]/[chapter_number].txt
 	baseDir := l.Config.Filesystem.Directory
-	bookDir := filepath.Join(baseDir, event.Book.Code)
+	translationDir := filepath.Join(baseDir, event.TranslationCode)
+	bookDir := filepath.Join(translationDir, event.Book.Code)
 	fileName := fmt.Sprintf("%d.txt", event.Chapter.Number)
 	filePath := filepath.Join(bookDir, fileName)
 

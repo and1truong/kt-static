@@ -1,17 +1,25 @@
 {
   "initialURL": "https://kinhthanh.httlvn.org/?v=VI1934",
   "fetch": {
-    "timeout": "30s",
-    "cache": true,
-    "cacheDir": "/tmp/kt-crawler/cache",
     "cacheTtlSeconds": 86400
   },
   "listeners": {
     "store": {
       "filesystem": {
-        "directory": "/tmp/kt-crawler/output/chapters"
+        "directory": "/tmp/kt-crawler/output"
       },
-      "dry": true
+      "dry": false
+    }
+  },
+  "cache": {
+    "default": {
+      "store": {
+        "backend": "filesystem",
+        "expiry": "24h",
+        "filesystem": {
+          "directory": "/tmp/kt-crawler/cache"
+        }
+      }
     }
   }
 }

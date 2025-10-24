@@ -5,13 +5,11 @@ import (
 	"encoding/json"
 	"flag"
 	"log"
+	"net/url"
 	"os"
-
+	
 	"htruong/kt-crawler/internal"
-	"htruong/kt-crawler/internal/listeners/book-scan"
-	"htruong/kt-crawler/internal/listeners/chapter-listener"
-	"htruong/kt-crawler/internal/listeners/store-listener"
-	"htruong/kt-crawler/internal/listeners/translation-scan"
+	"htruong/kt-crawler/internal/listeners"
 	"htruong/kt-crawler/internal/services/cache"
 	"htruong/kt-crawler/internal/services/eventdispatcher"
 	"htruong/kt-crawler/internal/services/logging"
@@ -37,7 +35,13 @@ func main() {
 	flag.StringVar(&configPath, "config", "", "path to the JSON configuration file")
 	flag.Parse()
 
-	var config *internal.Config
+	var (
+		ctx        = context.Background()
+		logger     = logging.NewLogger()
+		dispatcher = eventdispatcher.NewDispatcher(logger)
+		config     *internal.Config
+	)
+
 	if configPath != "" {
 		var err error
 		config, err = loadConfig(configPath)
@@ -48,38 +52,42 @@ func main() {
 		config = internal.NewDefaultConfig()
 	}
 
-	var (
-		ctx        = context.Background()
-		logger     = logging.NewLogger()
-		dispatcher = eventdispatcher.NewDispatcher(logger)
-	)
-
-	// Initialize cache store
-	cacheStore, err := cache.NewFileSystemStore(config.Fetch.CacheDir)
+	// Initialize Cache Store
+	store, err := cache.InitStore(config.Cache.Default.Store)
 	if err != nil {
 		log.Fatalf("Failed to initialize cache store: %v", err)
 	}
-	
+	cache.SetStore(store)
+
 	var (
-		translationListener = translation_scan.NewTranslationScanListener(dispatcher, config.Fetch, cacheStore)
-		bookListener        = book_scan.NewBookScanListener(dispatcher)
-		chapterListener     = chapter_listener.NewChapterScanListener(dispatcher, config.Fetch, cacheStore)
-		storeListener       = store_listener.NewStoreListener(config.Listeners.Store, logger)
+		translationListener = listeners.NewTranslationScanListener(dispatcher, config.Fetch)
+		bookListener        = listeners.NewBookScanListener(dispatcher)
+		chapterListener     = listeners.NewChapterScanListener(dispatcher, config.Fetch)
+		storeListener       = listeners.NewStoreListener(config.Listeners.Store, logger)
 	)
 
 	// Register Listeners
 	// ---------------------
 	{
-		dispatcher.Register(book_scan.BookScanEventName, bookListener)
-		dispatcher.Register(translation_scan.TranslationScanEventName, translationListener)
-		dispatcher.Register(chapter_listener.ChapterScanEventName, chapterListener)
-		dispatcher.Register(store_listener.StoreEventName, storeListener)
+		dispatcher.Register(listeners.BookScanEventName, bookListener)
+		dispatcher.Register(listeners.TranslationScanEventName, translationListener)
+		dispatcher.Register(listeners.ChapterScanEventName, chapterListener)
+		dispatcher.Register(listeners.StoreEventName, storeListener)
 	}
 
 	// Start the crawling process by dispatching the initial event.
 	// ---------------------
 	{
-		initialEvent := translation_scan.NewTranslationScanEvent(config.InitialURL)
+		parsedURL, err := url.Parse(config.InitialURL)
+		if err != nil {
+			log.Fatalf("Invalid initial URL: %v", err)
+		}
+		translationCode := parsedURL.Query().Get("v")
+		if translationCode == "" {
+			log.Fatalf("Translation code (v) not found in the initial URL")
+		}
+
+		initialEvent := listeners.NewTranslationScanEvent(config.InitialURL, translationCode)
 		if err := dispatcher.Dispatch(ctx, initialEvent); err != nil {
 			log.Fatalf("Initial dispatch failed: %v", err)
 		}

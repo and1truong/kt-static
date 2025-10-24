@@ -7,10 +7,7 @@ func NewDefaultConfig() *Config {
 	return &Config{
 		InitialURL: "https://kinhthanh.httlvn.org/?v=VI1934",
 		Fetch: fetch.Config{
-			Timeout:         "30s",
-			Cache:           true,
-			CacheDir:        ".cache",
-			CacheTtlSeconds: 86400, // 24 hours
+			Timeout: "30s",
 		},
 		Listeners: ListenersConfig{
 			Store: StoreConfig{
@@ -18,6 +15,17 @@ func NewDefaultConfig() *Config {
 					Directory: "/tmp/output/chapters",
 				},
 				DryRun: false,
+			},
+		},
+		Cache: CacheConfig{
+			Default: DefaultCacheConfig{
+				Store: CacheStoreConfig{
+					Backend: "filesystem",
+					Expiry:  "24h",
+					Filesystem: FilesystemConfig{
+						Directory: "/tmp/kt-crawler/cache",
+					},
+				},
 			},
 		},
 	}
@@ -28,6 +36,21 @@ type Config struct {
 	InitialURL string          `json:"initialURL"`
 	Listeners  ListenersConfig `json:"listeners"`
 	Fetch      fetch.Config    `json:"fetch"`
+	Cache      CacheConfig     `json:"cache"`
+}
+
+type CacheConfig struct {
+	Default DefaultCacheConfig `json:"default"`
+}
+
+type DefaultCacheConfig struct {
+	Store CacheStoreConfig `json:"store"`
+}
+
+type CacheStoreConfig struct {
+	Backend    string           `json:"backend"`
+	Expiry     string           `json:"expiry"`
+	Filesystem FilesystemConfig `json:"filesystem"`
 }
 
 type (

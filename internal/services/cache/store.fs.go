@@ -71,21 +71,9 @@ func (f *FileSystemStore) Write(ctx context.Context, key string, data []byte, ex
 		return fmt.Errorf("failed to marshal cache entry for key %s: %w", key, err)
 	}
 
-	// Write to a temporary file first and then rename for atomicity
-	tmpFile, err := os.CreateTemp(f.dir, key+".tmp")
-	if err != nil {
-		return fmt.Errorf("failed to create temp file for key %s: %w", key, err)
-	}
-	defer os.Remove(tmpFile.Name()) // Clean up temp file on error
-
-	if _, err := tmpFile.Write(fileData); err != nil {
-		tmpFile.Close()
-		return fmt.Errorf("failed to write to temp file for key %s: %w", key, err)
-	}
-	tmpFile.Close()
-
-	if err := os.Rename(tmpFile.Name(), filePath); err != nil {
-		return fmt.Errorf("failed to rename temp file to %s: %w", filePath, err)
+	// Write directly to the file path. Note: This is not atomic.
+	if err := os.WriteFile(filePath, fileData, 0644); err != nil {
+		return fmt.Errorf("failed to write cache file %s: %w", filePath, err)
 	}
 
 	return nil

@@ -7,29 +7,22 @@ import (
 	"net/http"
 	"net/url"
 	"time"
-
-	"htruong/kt-crawler/internal/services/cache"
 )
 
 // Config holds configuration for a fetch operation.
 type Config struct {
-	Timeout         string `json:"timeout"`
-	Cache           bool   `json:"cache"`
-	CacheDir        string `json:"cacheDir"`
-	CacheTtlSeconds int    `json:"cacheTtlSeconds"`
+	Timeout string `json:"timeout"`
 }
 
 // Fetcher is the service responsible for fetching content.
 type Fetcher struct {
 	config Config
-	store  cache.Store
 }
 
 // NewFetcher creates a new Fetcher instance.
-func NewFetcher(config Config, store cache.Store) *Fetcher {
+func NewFetcher(config Config) *Fetcher {
 	return &Fetcher{
 		config: config,
-		store:  store,
 	}
 }
 
@@ -54,13 +47,12 @@ func WithConfig(cfg Config) Option {
 	}
 }
 
-// Fetch fetches content from a requestPath, optionally using a cache and a custom timeout.
+// Fetch fetches content from a requestPath, optionally using a custom timeout.
 //
-// Simple call: f.Fetch(ctx, path) uses the Fetcher's default timeout and no cache.
+// Simple call: f.Fetch(ctx, path) uses the Fetcher's default timeout.
 // Configured call: f.Fetch(ctx, path, WithConfig(config)) uses the provided config.
 func (f *Fetcher) Fetch(ctx context.Context, path string, opts ...Option) ([]byte, error) {
 	config := f.config
-	config.Cache = false // Default for simple call is no cache
 
 	fetchOpts := &options{}
 	for _, opt := range opts {
@@ -71,19 +63,9 @@ func (f *Fetcher) Fetch(ctx context.Context, path string, opts ...Option) ([]byt
 		config = *fetchOpts.config
 	}
 
-	u, err := url.Parse(path)
+	_, err := url.Parse(path)
 	if err != nil {
 		return nil, fmt.Errorf("invalid requestPath: %w", err)
-	}
-	cacheKey := u.Host + u.Path
-
-	if config.Cache {
-		data, expiry, err := f.store.Read(ctx, cacheKey)
-		if err == nil && data != nil {
-			if expiry.IsZero() || expiry.After(time.Now()) {
-				return data, nil // Cache hit
-			}
-		}
 	}
 
 	timeout, err := time.ParseDuration(config.Timeout)
@@ -110,15 +92,6 @@ func (f *Fetcher) Fetch(ctx context.Context, path string, opts ...Option) ([]byt
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		return nil, err
-	}
-
-	if config.Cache {
-		var expiry time.Time
-		if config.CacheTtlSeconds > 0 {
-			expiry = time.Now().Add(time.Duration(config.CacheTtlSeconds) * time.Second)
-		}
-		// Note: We ignore the error here as a failed cache write should not fail the fetch operation.
-		_ = f.store.Write(ctx, cacheKey, body, expiry)
 	}
 
 	return body, nil

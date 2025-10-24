@@ -1,4 +1,4 @@
-package translation_scan
+package listeners
 
 import (
 	"bytes"
@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"htruong/kt-crawler/internal"
-	"htruong/kt-crawler/internal/listeners/book-scan"
 	"htruong/kt-crawler/internal/services/cache"
 	"htruong/kt-crawler/internal/services/eventdispatcher"
 	"htruong/kt-crawler/internal/services/fetch"
@@ -21,14 +20,16 @@ const TranslationScanEventName = "translation.scan"
 // TranslationScanEvent is the event dispatched when a translation needs to be scanned.
 type TranslationScanEvent struct {
 	*eventdispatcher.BaseEvent
-	RequestPath string
+	RequestPath     string
+	TranslationCode string
 }
 
 // NewTranslationScanEvent creates a new TranslationScanEvent.
-func NewTranslationScanEvent(requestPath string) *TranslationScanEvent {
+func NewTranslationScanEvent(requestPath string, translationCode string) *TranslationScanEvent {
 	return &TranslationScanEvent{
-		BaseEvent:   eventdispatcher.NewBaseEvent(TranslationScanEventName),
-		RequestPath: requestPath,
+		BaseEvent:       eventdispatcher.NewBaseEvent(TranslationScanEventName),
+		RequestPath:     requestPath,
+		TranslationCode: translationCode,
 	}
 }
 
@@ -39,10 +40,10 @@ type TranslationScanListener struct {
 }
 
 // NewTranslationScanListener creates a new TranslationScanListener.
-func NewTranslationScanListener(dispatcher *eventdispatcher.Dispatcher, config fetch.Config, cacheStore cache.Store) *TranslationScanListener {
+func NewTranslationScanListener(dispatcher *eventdispatcher.Dispatcher, config fetch.Config) *TranslationScanListener {
 	return &TranslationScanListener{
 		Dispatcher: dispatcher,
-		Fetcher:    fetch.NewFetcher(config, cacheStore),
+		Fetcher:    fetch.NewFetcher(config),
 	}
 }
 
@@ -80,7 +81,15 @@ func (l *TranslationScanListener) Handle(ctx context.Context, event eventdispatc
 		return fmt.Errorf("invalid url: %w", err)
 	}
 
-	body, err = l.Fetcher.Fetch(ctx, requestURL, fetch.WithConfig(l.Fetcher.Config()))
+	cacheKey := fmt.Sprintf("translation_scan:%s", url.QueryEscape(requestURL))
+	body, err = cache.Cache(
+		ctx,
+		cacheKey,
+		func() ([]byte, error) {
+			return l.Fetcher.Fetch(ctx, requestURL, fetch.WithConfig(l.Fetcher.Config()))
+		},
+	)
+
 	if err != nil {
 		return err
 	}
@@ -91,13 +100,13 @@ func (l *TranslationScanListener) Handle(ctx context.Context, event eventdispatc
 		return err
 	}
 
-	result, err := scan(doc)
+	result, err := l.scan(doc)
 	if err != nil {
 		return err
 	}
 
 	for _, book := range result.translation.Books {
-		event := book_scan.NewBookScanEvent(baseURL, book)
+		event := NewBookScanEvent(baseURL, book, scanEvent.TranslationCode)
 		if err := l.Dispatcher.Dispatch(ctx, event); err != nil {
 			return err
 		}
@@ -106,7 +115,7 @@ func (l *TranslationScanListener) Handle(ctx context.Context, event eventdispatc
 	return nil
 }
 
-func scan(doc *goquery.Document) (*Result, error) {
+func (l *TranslationScanListener) scan(doc *goquery.Document) (*Result, error) {
 	result := &Result{}
 
 	// scan translation name
@@ -126,24 +135,24 @@ func scan(doc *goquery.Document) (*Result, error) {
 	// loop through left & right
 	bookList.Find(".col-md-6").EachWithBreak(
 		func(i int, column *goquery.Selection) bool {
-			return scanColumn(result, column)
+			return l.scanColumn(result, column)
 		},
 	)
 
 	return result, nil
 }
 
-func scanColumn(result *Result, column *goquery.Selection) bool {
+func (l *TranslationScanListener) scanColumn(result *Result, column *goquery.Selection) bool {
 	column.Find(".col-md-12").EachWithBreak(
 		func(i int, box *goquery.Selection) bool {
-			return scanGroup(result, box)
+			return l.scanGroup(result, box)
 		},
 	)
 
 	return true
 }
 
-func scanGroup(result *Result, box *goquery.Selection) bool {
+func (l *TranslationScanListener) scanGroup(result *Result, box *goquery.Selection) bool {
 	if box.Find("h3").Size() > 0 {
 		result.testament = box.Find("h3").Text()
 		result.group = ""

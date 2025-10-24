@@ -1,14 +1,14 @@
-package chapter_listener
+package listeners
 
 import (
 	"bytes"
 	"context"
 	"fmt"
 	"htruong/kt-crawler/internal"
-	"htruong/kt-crawler/internal/listeners/store-listener"
 	"htruong/kt-crawler/internal/services/cache"
 	"htruong/kt-crawler/internal/services/eventdispatcher"
 	"htruong/kt-crawler/internal/services/fetch"
+	"net/url"
 	"strconv"
 	"strings"
 
@@ -20,17 +20,19 @@ const ChapterScanEventName = "chapter.scan"
 
 type ChapterScanEvent struct {
 	*eventdispatcher.BaseEvent
-	baseURL     string
-	book        internal.Book
-	requestPath string
+	baseURL         string
+	book            internal.Book
+	requestPath     string
+	translationCode string
 }
 
-func NewChapterScanEvent(baseURL string, book internal.Book, requestPath string) *ChapterScanEvent {
+func NewChapterScanEvent(baseURL string, book internal.Book, requestPath string, translationCode string) *ChapterScanEvent {
 	return &ChapterScanEvent{
-		BaseEvent:   eventdispatcher.NewBaseEvent(ChapterScanEventName),
-		book:        book,
-		baseURL:     baseURL,
-		requestPath: requestPath,
+		BaseEvent:       eventdispatcher.NewBaseEvent(ChapterScanEventName),
+		book:            book,
+		baseURL:         baseURL,
+		requestPath:     requestPath,
+		translationCode: translationCode,
 	}
 }
 
@@ -40,10 +42,10 @@ type ChapterScanListener struct {
 }
 
 // NewChapterScanListener creates a new ChapterScanListener.
-func NewChapterScanListener(dispatcher *eventdispatcher.Dispatcher, config fetch.Config, cacheStore cache.Store) *ChapterScanListener {
+func NewChapterScanListener(dispatcher *eventdispatcher.Dispatcher, config fetch.Config) *ChapterScanListener {
 	return &ChapterScanListener{
 		Dispatcher: dispatcher,
-		Fetcher:    fetch.NewFetcher(config, cacheStore),
+		Fetcher:    fetch.NewFetcher(config),
 	}
 }
 
@@ -63,7 +65,16 @@ func (l *ChapterScanListener) Handle(ctx context.Context, rawEvent eventdispatch
 	}
 
 	requestURL := fmt.Sprintf("%s%s", event.baseURL, event.requestPath)
-	body, err := l.Fetcher.Fetch(ctx, requestURL, fetch.WithConfig(l.Fetcher.Config()))
+
+	cacheKey := fmt.Sprintf("chapter_scan:%s", url.QueryEscape(requestURL))
+	body, err := cache.Cache(
+		ctx,
+		cacheKey,
+		func() ([]byte, error) {
+			return l.Fetcher.Fetch(ctx, requestURL, fetch.WithConfig(l.Fetcher.Config()))
+		},
+	)
+
 	if err != nil {
 		return fmt.Errorf("could not fetch book indexing page: %w", err)
 	}
@@ -73,12 +84,12 @@ func (l *ChapterScanListener) Handle(ctx context.Context, rawEvent eventdispatch
 		return fmt.Errorf("could not parse chapter page: %w", err)
 	}
 
-	if blocks, number, err := parseHtmlDoc(doc); nil != err {
+	if blocks, number, err := l.parseHtmlDoc(doc); nil != err {
 		fmt.Printf("could not parse chapter page: %s\n", err)
 
 		return err
 	} else {
-		audioLinks := parseAudioLinks(doc)
+		audioLinks := l.parseAudioLinks(doc)
 
 		chapter := internal.Chapter{
 			Number:     number,
@@ -86,7 +97,7 @@ func (l *ChapterScanListener) Handle(ctx context.Context, rawEvent eventdispatch
 			AudioLinks: audioLinks,
 		}
 
-		parsedEvent := store_listener.NewStoreEvent(event.book, chapter)
+		parsedEvent := NewStoreEvent(event.book, chapter, event.translationCode)
 		if err := l.Dispatcher.Dispatch(ctx, parsedEvent); err != nil {
 			return fmt.Errorf("failed to dispatch chapter parsed event: %w", err)
 		}
@@ -95,12 +106,12 @@ func (l *ChapterScanListener) Handle(ctx context.Context, rawEvent eventdispatch
 	return nil
 }
 
-func parseHtmlDoc(doc *goquery.Document) ([]internal.Block, int, error) {
+func (l *ChapterScanListener) parseHtmlDoc(doc *goquery.Document) ([]internal.Block, int, error) {
 	blocks := []internal.Block{}
 	chapNumber := 0
 	doc.Find(".bible-read > div > *").EachWithBreak(
 		func(i int, selection *goquery.Selection) bool {
-			block, chap, ok := parseBlock(selection)
+			block, chap, ok := l.parseBlock(selection)
 			if !ok {
 				return true
 			}
@@ -117,22 +128,22 @@ func parseHtmlDoc(doc *goquery.Document) ([]internal.Block, int, error) {
 	return blocks, chapNumber, nil
 }
 
-func parseBlock(selection *goquery.Selection) (internal.Block, int, bool) {
+func (l *ChapterScanListener) parseBlock(selection *goquery.Selection) (internal.Block, int, bool) {
 	attrClass, found := selection.Attr("class")
 	if !found {
 		return internal.Block{}, 0, false
 	}
 
 	if strings.Contains(attrClass, "title") {
-		block, chapNumber := parseTitle(selection, attrClass)
+		block, chapNumber := l.parseTitle(selection, attrClass)
 
 		return block, chapNumber, true
 	}
 
-	return parseVerse(selection, attrClass), 0, true
+	return l.parseVerse(selection, attrClass), 0, true
 }
 
-func parseTitle(selection *goquery.Selection, attrClass string) (internal.Block, int) {
+func (l *ChapterScanListener) parseTitle(selection *goquery.Selection, attrClass string) (internal.Block, int) {
 	// <h1>1</h1><h3>Lời đạt và chào thăm</h3>
 	chapNumber := 0
 	block := internal.Block{
@@ -152,7 +163,7 @@ func parseTitle(selection *goquery.Selection, attrClass string) (internal.Block,
 	selection.FindMatcher(goquery.Single("h3")).Each(
 		func(i int, sub *goquery.Selection) {
 			block.Content = append(block.Content, internal.InnerBlock{
-				Content:    cleanUpString(sub.Text()),
+				Content:    l.cleanUpString(sub.Text()),
 				References: nil,
 			})
 		},
@@ -161,7 +172,7 @@ func parseTitle(selection *goquery.Selection, attrClass string) (internal.Block,
 	return block, chapNumber
 }
 
-func parseVerse(selection *goquery.Selection, attrClass string) internal.Block {
+func (l *ChapterScanListener) parseVerse(selection *goquery.Selection, attrClass string) internal.Block {
 	block := internal.Block{
 		Kind:       "verse",
 		Classes:    strings.Split(attrClass, " "),
@@ -169,13 +180,13 @@ func parseVerse(selection *goquery.Selection, attrClass string) internal.Block {
 	}
 
 	var txt string
-	block.Number, txt, block.NewLine = cleanupInnerText(selection)
-	block.Content = parseInnerBlocks(txt)
+	block.Number, txt, block.NewLine = l.cleanupInnerText(selection)
+	block.Content = l.parseInnerBlocks(txt)
 
 	return block
 }
 
-func cleanupInnerText(selection *goquery.Selection) (string, string, bool) {
+func (l *ChapterScanListener) cleanupInnerText(selection *goquery.Selection) (string, string, bool) {
 	var num string
 	var newLine bool
 	txt, _ := selection.Html()
@@ -184,8 +195,9 @@ func cleanupInnerText(selection *goquery.Selection) (string, string, bool) {
 	selection.Find("sup").Each(
 		func(i int, sup *goquery.Selection) {
 			num = sup.Text()
+			supHTML, _ := l.outerHTML(sup)
 			txt = strings.Trim(
-				strings.Replace(txt, outerHTML(sup), "", 1),
+				strings.Replace(txt, supHTML, "", 1),
 				" ",
 			)
 		},
@@ -198,10 +210,10 @@ func cleanupInnerText(selection *goquery.Selection) (string, string, bool) {
 		txt = strings.TrimSuffix(txt, "<br/>")
 	}
 
-	return num, cleanUpString(txt), newLine
+	return num, l.cleanUpString(txt), newLine
 }
 
-func cleanUpString(txt string) string {
+func (l *ChapterScanListener) cleanUpString(txt string) string {
 	txt = strings.Trim(txt, "  ")
 	txt = strings.Replace(txt, " ", " ", -1)
 	txt = strings.Replace(txt, " ", " ", -1)
@@ -212,18 +224,18 @@ func cleanUpString(txt string) string {
 	return txt
 }
 
-func parseInnerBlocks(txt string) []internal.InnerBlock {
+func (l *ChapterScanListener) parseInnerBlocks(txt string) []internal.InnerBlock {
 	var blocks []internal.InnerBlock
 
 	parts := strings.Split(txt, "<br/>")
 	for _, part := range parts {
-		blocks = append(blocks, parseInnerBlock(part))
+		blocks = append(blocks, l.parseInnerBlock(part))
 	}
 
 	return blocks
 }
 
-func parseInnerBlock(txt string) internal.InnerBlock {
+func (l *ChapterScanListener) parseInnerBlock(txt string) internal.InnerBlock {
 	block := internal.InnerBlock{
 		Content:    txt,
 		References: []string{},
@@ -237,7 +249,8 @@ func parseInnerBlock(txt string) internal.InnerBlock {
 	// Remove <a data-toggle="tooltip" data-placement="bottom" title="…">⚓</a>
 	doc.Find("a[data-toggle]").Each(
 		func(i int, ref *goquery.Selection) {
-			block.Content = strings.Replace(block.Content, outerHTML(ref), "", -1)
+			refHTML, _ := l.outerHTML(ref)
+			block.Content = strings.Replace(block.Content, refHTML, "", -1)
 			block.References = strings.Split(ref.AttrOr("title", ""), "; ")
 		},
 	)
@@ -245,14 +258,16 @@ func parseInnerBlock(txt string) internal.InnerBlock {
 	return block
 }
 
-func outerHTML(selection *goquery.Selection) string {
+func (l *ChapterScanListener) outerHTML(selection *goquery.Selection) (string, error) {
 	var buf bytes.Buffer
-	html.Render(&buf, selection.Nodes[0])
+	if err := html.Render(&buf, selection.Nodes[0]); err != nil {
+		return "", err
+	}
 
-	return buf.String()
+	return buf.String(), nil
 }
 
-func parseAudioLinks(doc *goquery.Document) []string {
+func (l *ChapterScanListener) parseAudioLinks(doc *goquery.Document) []string {
 	audioLinks := []string{}
 	doc.Find(".audio-collapse > div > audio").Each(
 		func(i int, audio *goquery.Selection) {
