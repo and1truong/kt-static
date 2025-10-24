@@ -12,13 +12,12 @@ import (
 )
 
 // listChapters lists available chapters for a given book.
-func listChapters(bookPath string, bookLabel string) error {
+func listChapters(bookPath string, bookLabel string, translationLabel string) error {
 	chapters, err := os.ReadDir(bookPath)
 	if err != nil {
 		return cli.Exit(fmt.Sprintf("Failed to read book directory %s: %v", bookPath, err), 1)
 	}
 
-	fmt.Printf("\nChapters in %s:\n\n", bookLabel)
 	var chapterFiles []os.DirEntry
 	for _, chapterEntry := range chapters {
 		if chapterEntry.Name() != "_category_.json" {
@@ -38,11 +37,8 @@ func listChapters(bookPath string, bookLabel string) error {
 		numStrI := strings.TrimSuffix(nameI, filepath.Ext(nameI))
 		numStrJ := strings.TrimSuffix(nameJ, filepath.Ext(nameJ))
 
-		var numI, numJ int
-		var errI, errJ error
-
-		numI, errI = strconv.Atoi(numStrI)
-		numJ, errJ = strconv.Atoi(numStrJ)
+		numI, errI := strconv.Atoi(numStrI)
+		numJ, errJ := strconv.Atoi(numStrJ)
 
 		if errI != nil && errJ != nil {
 			return nameI < nameJ // both non-numeric, sort alphabetically
@@ -64,30 +60,44 @@ func listChapters(bookPath string, bookLabel string) error {
 		chapterLabels[i] = fmt.Sprintf("Chapter %s", numStr)
 	}
 
-	if err := formatInColumns(chapterLabels, 4); err != nil {
-		return err
+	for {
+		fmt.Printf("\nChapters in %s:\n\n", bookLabel)
+		if err := formatInColumns(chapterLabels, 4); err != nil {
+			return err
+		}
+
+		// Get user selection for chapter
+		fmt.Print("Enter chapter number to read (or 'q' to quit): ")
+		var input string
+		_, err = fmt.Scanln(&input)
+		if err != nil {
+			return cli.Exit("Invalid input", 1)
+		}
+
+		if strings.ToLower(input) == "q" {
+			return nil
+		}
+
+		chapterSelection, err := strconv.Atoi(input)
+		if err != nil || chapterSelection < 1 || chapterSelection > len(chapterFiles) {
+			fmt.Println("Invalid chapter selection, please try again.")
+			continue
+		}
+
+		chapterPath, err := getChapterPath(bookPath, chapterSelection, chapterFiles)
+		if err != nil {
+			return cli.Exit(fmt.Sprintf("Failed to get chapter path: %v", err), 1)
+		}
+
+		err = ReadChapter(
+			chapterPath,
+			translationLabel,
+			bookLabel,
+			chapterLabels[chapterSelection-1],
+			len(chapterFiles),
+		)
+		if err != nil {
+			return cli.Exit(fmt.Sprintf("Failed to read chapter: %v", err), 1)
+		}
 	}
-
-	// Get user selection for chapter
-	fmt.Print("Enter chapter number to read: ")
-	var chapterSelection int
-	_, err = fmt.Scanln(&chapterSelection)
-	if err != nil || chapterSelection < 1 || chapterSelection > len(chapterFiles) {
-		return cli.Exit("Invalid chapter selection", 1)
-	}
-
-	selectedChapterFile := chapterFiles[chapterSelection-1]
-	chapterPath := filepath.Join(bookPath, selectedChapterFile.Name())
-
-	// Read and display chapter content
-	content, err := os.ReadFile(chapterPath)
-	if err != nil {
-		return cli.Exit(fmt.Sprintf("Failed to read chapter file %s: %v", chapterPath, err), 1)
-	}
-
-	fmt.Printf("\n--- %s - %s ---\n\n", bookLabel, chapterLabels[chapterSelection-1])
-	fmt.Println(string(content))
-	fmt.Printf("\n--- End of Chapter ---\n")
-
-	return nil
 }

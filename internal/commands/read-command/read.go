@@ -29,7 +29,7 @@ func RunRead(c *cli.Context, config *internal.Config) error {
 	}
 
 	// 3. List Chapters
-	return listChapters(bookPath, selectedBook.Label)
+	return listChapters(bookPath, selectedBook.Label, selectedTranslation)
 }
 
 // formatInColumns prints a list of labels in the specified number of columns.
