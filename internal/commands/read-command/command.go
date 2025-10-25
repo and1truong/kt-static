@@ -79,6 +79,7 @@ type modal struct {
 
 	// chapters
 	chapters      []os.DirEntry
+	chapterCursor int
 	chapterPath   string
 	chapterLabels []string
 	chapterTotal  int

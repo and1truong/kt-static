@@ -11,6 +11,7 @@ import (
 func chapterContentEnter(m modal) modal {
 	m.chapterPath = filepath.Join(m.bookPath, m.chapters[m.cursor].Name())
 	m.state = viewChapterContent
+	m.chapterCursor = m.cursor
 	m.cursor = 0
 
 	if m.chapterContent == "" {
@@ -33,7 +34,12 @@ func chapterContentDisplay(m modal) string {
 }
 
 func chapterContentUpdate(m modal, msg tea.KeyMsg) (tea.Model, tea.Cmd) {
-	// No specific key handling for content view in original code,
-	// other than global ctrl+c/q.
+	switch msg.String() {
+	case "esc":
+		m.state = viewChapters
+		m.chapterContent = ""
+		m.cursor = m.chapterCursor
+		return m, nil
+	}
 	return m, nil
 }
