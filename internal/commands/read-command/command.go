@@ -5,6 +5,7 @@ import (
 	"htruong/kt-crawler/internal"
 	"os"
 
+	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/urfave/cli/v2"
@@ -86,6 +87,7 @@ type modal struct {
 
 	// content
 	chapterContent string
+	viewport       viewport.Model
 }
 
 func (m modal) Init() tea.Cmd {
@@ -116,6 +118,10 @@ func (m modal) View() string {
 
 func (m modal) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
+	case tea.WindowSizeMsg:
+		m.viewport.Width = msg.Width
+		m.viewport.Height = msg.Height
+		return m, nil
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "ctrl+c", "q":

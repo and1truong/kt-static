@@ -20,6 +20,7 @@ func chapterContentEnter(m modal) modal {
 			m.err = fmt.Errorf("failed to read chapter file %s: %v", m.chapterPath, err)
 		}
 		m.chapterContent = string(contentBytes)
+		m.viewport.SetContent(m.chapterContent)
 	}
 
 	return m
@@ -30,16 +31,21 @@ func chapterContentDisplay(m modal) string {
 		return "Error: " + m.err.Error() + "\n"
 	}
 
-	return m.chapterContent
+	return m.viewport.View()
 }
 
-func chapterContentUpdate(m modal, msg tea.KeyMsg) (tea.Model, tea.Cmd) {
-	switch msg.String() {
-	case "esc":
-		m.state = viewChapters
-		m.chapterContent = ""
-		m.cursor = m.chapterCursor
-		return m, nil
+func chapterContentUpdate(m modal, msg tea.Msg) (tea.Model, tea.Cmd) {
+	var cmd tea.Cmd
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch msg.String() {
+		case "esc":
+			m.state = viewChapters
+			m.chapterContent = ""
+			m.cursor = m.chapterCursor
+			return m, nil
+		}
 	}
-	return m, nil
+	m.viewport, cmd = m.viewport.Update(msg)
+	return m, cmd
 }
