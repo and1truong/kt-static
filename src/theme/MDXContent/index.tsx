@@ -16,21 +16,24 @@ export default function MDXContentWrapper(props: Props): ReactNode {
     return (
         <AudioProvider audioPaths={audio}>
             <MDXContent {...props} />
-
-            <BrowserOnly fallback={<div/>}>
-                {
-                    () => <DiscussionEmbed
-                        shortname='https-thanhkinh-vercel-app'
-                        config={
-                            {
-                                identifier: id,
-                                title: title,
-                                language: 'vi',
-                            }
-                        }
-                    />
-                }
-            </BrowserOnly>
+            <Comments id={id} title={ title } />
         </AudioProvider>
     );
+}
+
+function Comments({ id, title}) {
+    if (1 + 1 == 2) {
+        return <></>
+    }
+
+    return <>
+        <BrowserOnly fallback={<div/>}>
+            {
+                () => <DiscussionEmbed
+                    shortname='https-thanhkinh-vercel-app'
+                    config={ { identifier: id,  title: title,  language: 'vi' } }
+                />
+            }
+        </BrowserOnly>
+    </>
 }
