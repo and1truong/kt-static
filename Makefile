@@ -19,6 +19,9 @@ go-fmt:
 go-lint:
 	golangci-lint run ./...
 
+go-scan:
+	go run cmd/kt-crawler/main.go scan
+
 go-run-read:
 	go run ./cmd/kt-crawler -config config.sample.json read
 

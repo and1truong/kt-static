@@ -67,6 +67,8 @@ func (l *StoreListener) Handle(ctx context.Context, rawEvent eventdispatcher.Eve
 		content += block.String()
 	}
 
+	content = internal.CleanMarkdownContent(content)
+
 	if l.Config.DryRun {
 		l.Logger.Info("Dry run: Would write chapter content",
 			"book", event.Book.Code,

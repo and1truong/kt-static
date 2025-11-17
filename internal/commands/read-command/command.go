@@ -40,10 +40,10 @@ var (
 	subtleStyle   = lipgloss.NewStyle().Foreground(lipgloss.Color("241"))
 	checkboxStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("212"))
 	dotStyle      = lipgloss.NewStyle().Foreground(lipgloss.Color("236")).Render(dotChar)
-	mainStyle     = lipgloss.NewStyle().MarginLeft(2)
+	mainStyle     = lipgloss.NewStyle().MarginLeft(2).MarginRight(2)
 )
 
-func RunRead(c *cli.Context, config *internal.Config) error {
+func RunRead(_ *cli.Context, config *internal.Config) error {
 	m := modal{
 		config:  config,
 		baseDir: config.Listeners.Store.Filesystem.Directory,
@@ -54,7 +54,11 @@ func RunRead(c *cli.Context, config *internal.Config) error {
 	m = translationListEnter(m)
 
 	// start program until error
-	p := tea.NewProgram(m, tea.WithAltScreen())
+	p := tea.NewProgram(
+		m,
+		//tea.WithAltScreen(),
+		//tea.WithMouseCellMotion(),
+	)
 	_, err := p.Run()
 
 	return err
@@ -64,6 +68,7 @@ type modal struct {
 	config *internal.Config
 
 	state    viewState
+	ready    bool
 	cursor   int
 	baseDir  string
 	err      error
@@ -122,6 +127,7 @@ func (m modal) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.viewport.Width = msg.Width
 		m.viewport.Height = msg.Height
 		return m, nil
+
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "ctrl+c", "q":
@@ -148,7 +154,7 @@ func (m modal) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func checkbox(label string, checked bool) string {
 	if checked {
-		return checkboxStyle.Render("[x] " + label)
+		return checkboxStyle.Render("> " + label)
 	}
-	return fmt.Sprintf("[ ] %s", label)
+	return fmt.Sprintf("  %s", label)
 }

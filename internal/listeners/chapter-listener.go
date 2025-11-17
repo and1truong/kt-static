@@ -3,6 +3,7 @@ package listeners
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"htruong/kt-crawler/internal"
 	"htruong/kt-crawler/internal/services/cache"
@@ -82,6 +83,10 @@ func (l *ChapterScanListener) Handle(ctx context.Context, rawEvent eventdispatch
 	doc, err := goquery.NewDocumentFromReader(bodyReader)
 	if err != nil {
 		return fmt.Errorf("could not parse chapter page: %w", err)
+	}
+
+	if requestURL == "https://kinhthanh.httlvn.org/doc-kinh-thanh/gi/6?v=VI1934" {
+		fmt.Println("wip")
 	}
 
 	if blocks, number, err := l.parseHtmlDoc(doc); nil != err {
@@ -237,21 +242,38 @@ func (l *ChapterScanListener) parseInnerBlocks(txt string) []internal.InnerBlock
 
 func (l *ChapterScanListener) parseInnerBlock(txt string) internal.InnerBlock {
 	block := internal.InnerBlock{
-		Content:    txt,
+		// Content will be set later
 		References: []string{},
 	}
 
-	doc, err := goquery.NewDocumentFromReader(strings.NewReader(txt))
+	// Wrap the fragment in a body tag to help goquery parse it correctly.
+	doc, err := goquery.NewDocumentFromReader(strings.NewReader("<body>" + txt + "</body>"))
 	if err != nil {
+		block.Content = txt // fallback
 		return block
 	}
 
-	// Remove <a data-toggle="tooltip" data-placement="bottom" title="…">⚓</a>
+	bodyHtml, _ := doc.Find("body").Html()
+	block.Content = bodyHtml
+
+	// Replace <a data-toggle="tooltip" data-placement="bottom" title="…">⚓</a> with a markdown-style link.
 	doc.Find("a[data-toggle]").Each(
 		func(i int, ref *goquery.Selection) {
 			refHTML, _ := l.outerHTML(ref)
-			block.Content = strings.Replace(block.Content, refHTML, "", -1)
-			block.References = strings.Split(ref.AttrOr("title", ""), "; ")
+			title := ref.AttrOr("title", "")
+			linkText := ref.Text()
+
+			// Create the markdown-style link
+			// e.g. [⚓](tooltip:{"title":"…"})
+			payload := map[string]string{"title": title}
+			jsonPayload, _ := json.Marshal(payload)
+			markdownLink := fmt.Sprintf("[%s](tooltip:%s)", linkText, string(jsonPayload))
+
+			// Replace the original <a> tag with the new markdown link
+			block.Content = strings.Replace(block.Content, refHTML, markdownLink, 1)
+
+			// Keep populating references
+			block.References = append(block.References, strings.Split(title, "; ")...)
 		},
 	)
 
